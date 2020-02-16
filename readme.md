@@ -43,4 +43,4 @@ class Features(dh: dependencyHandler) {
 
 This file will be accessible from any 
 
-Note: This requires `buildSrc` to be enabled with the Kotlin dsl plugin as it is defined in this example: https://github.com/gradle/kotlin-dsl-samples/tree/master/samples/multi-kotlin-project-with-buildSrc
+Note: This requires `buildSrc` to be enabled with the Kotlin dsl plugin as it is defined in this example: [multi-kotlin-project-with-buildSrc](https://github.com/gradle/kotlin-dsl-samples/tree/master/samples/multi-kotlin-project-with-buildSrc)
