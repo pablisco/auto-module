@@ -50,8 +50,6 @@ class AutoModulePluginTest {
         result.output.shouldContainProjects(":moduleOne", ":moduleTwo", ":moduleThree")
 
         result.task(":moduleThree:tasks")?.outcome shouldBeEqualTo SUCCESS
-
-        projectDir.modulesKt shouldBeEqualTo resourceText("expected/multiple_modules/modules.kt")
     }
 
     @Test
