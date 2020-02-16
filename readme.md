@@ -22,18 +22,18 @@ If you have a project with the following structure:
 ```
 root
 +-- app
-+-- features
+\-- features
     +-- home
-    +-- settings
+    \-- settings
 ```
 
 A file inside `buildSrc` will be created with the following code:
 
 ```kotlin
-val DependencyHandler.modules: Modules
-    get() = Modules(this)
+val DependencyHandler.local: Local
+    get() = Local(this)
 
-class Modules(dh: DependencyHandler) {
+class Local(dh: DependencyHandler) {
     val app = dh.project(":app")
     val features = Features(dh)
 }
@@ -44,6 +44,12 @@ class Features(dh: dependencyHandler) {
 }
 ```
 
-This file will be accessible from any 
+This file will be accessible from any modules so we can add dependencies to other modules like:
+
+```kotlin
+implementation(local.features.home)
+```
 
 Note: This requires `buildSrc` to be enabled with the Kotlin dsl plugin as it is defined in this example: [multi-kotlin-project-with-buildSrc](https://github.com/gradle/kotlin-dsl-samples/tree/master/samples/multi-kotlin-project-with-buildSrc)
+
+Extra tip: Since `modules.kt` is generated each time the build is evaluated, it's possible to add it to `.gitignore` to avoid unnecessary changes when committing :)

@@ -1,3 +1,4 @@
+import com.android.build.gradle.internal.tasks.factory.dependsOn
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -25,6 +26,11 @@ tasks {
     withType<KotlinCompile>().configureEach {
         kotlinOptions.jvmTarget = "1.8"
     }
+
+    processTestResources.dependsOn(register<Copy>("copyTestResources") {
+        from("${projectDir}/src/test/resources")
+        into("${buildDir}/classes/kotlin/test")
+    })
 }
 
 val sourcesJar = tasks.register<Jar>("sourcesJar") {

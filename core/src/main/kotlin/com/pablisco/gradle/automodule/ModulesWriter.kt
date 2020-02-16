@@ -14,10 +14,10 @@ private fun Collection<ModuleNode>.toCode() = """
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.kotlin.dsl.project
 
-val DependencyHandler.modules: Modules
-    get() = Modules(this)
+val DependencyHandler.local: Local
+    get() = Local(this)
 
-class Modules(dh: DependencyHandler) {
+class Local(dh: DependencyHandler) {
     ${joinToString("\n    ") { it.toProperty() }}
 }
 
