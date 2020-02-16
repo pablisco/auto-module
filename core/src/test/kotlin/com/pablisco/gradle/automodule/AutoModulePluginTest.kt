@@ -72,12 +72,25 @@ private fun String.shouldContainProjects(vararg modules: String) {
 private fun File.givenAProject(path: String, vararg extraParams: String): BuildResult {
     resource(path).copyRecursively(target = this)
 
+    removeNoWarningExtensions()
+
     return GradleRunner.create()
         .withProjectDir(this)
         .withPluginClasspath()
         .withArguments(*(arrayOf("projects", "--stacktrace") + extraParams))
         .build()
         .apply { println(output) }
+}
+
+/**
+ * Kts files are compiled by the IDE, so adding the .nowarn extension to a failing file will allow to ignore it by the IDE. This will restore the file to it's former extension.
+ */
+private fun File.removeNoWarningExtensions() {
+    walkTopDown().onEach { file ->
+        if (file.extension == "nowarn") {
+            file.renameTo(File(file.absolutePath.replace(".nowarn", "")))
+        }
+    }
 }
 
 private val File.modulesKt: String
