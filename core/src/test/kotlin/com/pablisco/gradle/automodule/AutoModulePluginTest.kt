@@ -59,10 +59,10 @@ class AutoModulePluginTest {
             import org.gradle.api.artifacts.dsl.DependencyHandler
             import org.gradle.kotlin.dsl.project
 
-            val DependencyHandler.local: Local
-                get() = Local(this)
+            val DependencyHandler.modules: Modules
+                get() = Modules(this)
 
-            class Local(dh: DependencyHandler) {
+            class Modules(dh: DependencyHandler) {
                 val singleModule = dh.project(":singleModule")
             }
         """.trimIndent()
@@ -88,10 +88,10 @@ class AutoModulePluginTest {
             import org.gradle.api.artifacts.dsl.DependencyHandler
             import org.gradle.kotlin.dsl.project
 
-            val DependencyHandler.local: Local
-                get() = Local(this)
+            val DependencyHandler.modules: Modules
+                get() = Modules(this)
 
-            class Local(dh: DependencyHandler) {
+            class Modules(dh: DependencyHandler) {
                 val moduleTwo = dh.project(":moduleTwo")
                 val moduleOne = dh.project(":moduleOne")
             }
@@ -118,10 +118,10 @@ class AutoModulePluginTest {
             import org.gradle.api.artifacts.dsl.DependencyHandler
             import org.gradle.kotlin.dsl.project
 
-            val DependencyHandler.local: Local
-                get() = Local(this)
+            val DependencyHandler.modules: Modules
+                get() = Modules(this)
 
-            class Local(dh: DependencyHandler) {
+            class Modules(dh: DependencyHandler) {
                 val moduleOne = dh.project(":moduleOne")
                 val parent = Parent(dh)
             }
