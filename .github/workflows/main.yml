@@ -7,17 +7,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Build
-        run: ./gradlew build -i
-      - name: Cache .gradle
-        uses: actions/cache@v1
+      - uses: actions/cache@v1
         with:
           path: .gradle
           key: ${{ runner.os }}-dotgradle-${{ hashFiles('**/build.gradle') }}
           restore-keys: |
             ${{ runner.os }}-dotgradle-
-      - name: Cache gradle
-        uses: actions/cache@v1
+      - uses: actions/cache@v1
         with:
           path: /home/runner/.gradle
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/build.gradle') }}
@@ -29,3 +25,5 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
+      - name: Build
+        run: ./gradlew build --stacktrace
