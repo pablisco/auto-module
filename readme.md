@@ -1,5 +1,8 @@
 # [WIP] Auto Module
 
+![https://github.com/pablisco/auto-module/actions](https://github.com/pablisco/auto-module/workflows/Main/badge.svg)
+
+
 This Gradle plugin helps with module declaration. And by help, it means it does it all for you.
 
 ## How do I use it?
