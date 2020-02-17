@@ -6,6 +6,7 @@ plugins {
     `java-gradle-plugin`
     `maven-publish`
     id("com.palantir.idea-test-fix") version "0.1.0"
+    id("com.gradle.plugin-publish") version "0.10.1"
 }
 
 dependencies {
@@ -48,6 +49,23 @@ publishing {
             logger.info("saving to $localRepoPath")
             from(components["java"])
             artifact(sourcesJar.get())
+        }
+    }
+}
+
+pluginBundle {
+    website = "https://github.com/pablisco/auto-module/"
+    vcsUrl = "https://github.com/pablisco/auto-module/"
+    tags = listOf("auto", "module")
+}
+
+gradlePlugin {
+    plugins {
+        create("auto-module") {
+            id = "com.pablisco.gradle.automodule"
+            displayName = "Auto Module"
+            description = "A Gradle plugin to generate the module graph and include the modules"
+            implementationClass = "com.pablisco.gradle.automodule.AutoModulePlugin"
         }
     }
 }

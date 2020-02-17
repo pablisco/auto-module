@@ -1,44 +1,51 @@
 package com.pablisco.gradle.automodule
 
 import com.pablisco.gradle.automodule.utils.camelCase
-import com.pablisco.gradle.automodule.utils.createFile
 import com.pablisco.gradle.automodule.utils.snakeCase
-import java.io.File
-
-internal fun Collection<ModuleNode>.writeTo(file: File) {
-    file.delete()
-    file.createFile(content = cleanup().toCode())
-}
-
-private fun Collection<ModuleNode>.toCode() = """
+import com.squareup.kotlinpoet.*
+import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.dsl.DependencyHandler
-import org.gradle.kotlin.dsl.project
+import java.nio.file.Path
 
-val DependencyHandler.local: Local
-    get() = Local(this)
-
-class Local(dh: DependencyHandler) {
-    ${joinToString("\n    ") { it.toProperty() }}
+internal fun Collection<ModuleNode>.writeTo(directory: Path, fileName: String) {
+    FileSpec.builder("", fileName).apply {
+        addImport("org.gradle.kotlin.dsl", "project")
+        addProperty(
+            PropertySpec.builder("local", ClassName("", "Local"))
+                .apply {
+                    receiver(DependencyHandler::class.asClassName())
+                    getter(
+                        FunSpec.getterBuilder()
+                            .addStatement("return Local(this)")
+                            .build()
+                    )
+                }.build()
+        )
+        addType(cleanup().toTypeSpec("Local"))
+        flatten().filterNot { it.children.isEmpty() }.forEach {
+            addType(it.children.toTypeSpec(it.name))
+        }
+    }.build().writeTo(directory)
 }
 
-${flatten().filterNot { it.children.isEmpty() }.joinToString("\n") {
-    it.children.toModuleType(it.name)
-}}
+private fun ModuleNode.toPropertySpec() = when (children.size) {
+    0 -> PropertySpec.builder(name.snakeCase(), Dependency::class.asClassName())
+        .initializer("""dh.project("$path")""")
+    else -> PropertySpec.builder(name.snakeCase(), ClassName.bestGuess(name.camelCase()))
+        .initializer("""${name.camelCase()}(dh)""")
+}.build()
 
-""".trim()
+private fun Collection<ModuleNode>.toTypeSpec(name: String) =
+    TypeSpec.classBuilder(name.camelCase())
+        .primaryConstructor(
+            FunSpec.constructorBuilder()
+                .addParameter(ParameterSpec("dh", DependencyHandler::class.asClassName()))
+                .build()
+        )
+        .addProperties(map { it.toPropertySpec() })
+        .build()
 
 private fun Collection<ModuleNode>.flatten(): Sequence<ModuleNode> =
-    asSequence().fold(emptySequence()) { acc, it ->
-        acc + it + it.children.asSequence()
+    fold(emptySequence()) { acc, it ->
+        acc + it + it.children
     }
-
-private fun ModuleNode.toProperty() = when {
-    children.isEmpty() -> """val ${name.snakeCase()} = dh.project("$path")"""
-    else -> """val ${name.snakeCase()} = ${name.camelCase()}(dh)"""
-}
-
-private fun List<ModuleNode>.toModuleType(name: String) = """
-class ${name.camelCase()}(dh: DependencyHandler) {
-    ${joinToString("\n    ") { it.toProperty() }}
-}
-""".trimStart()

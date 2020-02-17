@@ -35,39 +35,29 @@ class AutoModulePluginTest {
     fun `generates modules code WITH single module`(@TempDir projectDir: File) {
         val result = projectDir.givenAProject("single_module")
 
-        result.output.shouldContainProjects(":singleModule")
-
-        projectDir.modulesKt shouldBeEqualTo resourceText("expected/single_module/modules.kt")
+        result.shouldBeSuccess()
     }
+
 
     @Test
     fun `generates modules code WITH multiple modules`(@TempDir projectDir: File) {
-        val result = projectDir.givenAProject(
-            "multiple_modules",
-            ":moduleThree:tasks"
-        )
+        val result = projectDir.givenAProject("multiple_modules")
 
-        result.output.shouldContainProjects(":moduleOne", ":moduleTwo", ":moduleThree")
-
-        result.task(":moduleThree:tasks")?.outcome shouldBeEqualTo SUCCESS
+        result.shouldBeSuccess()
     }
 
     @Test
     fun `generates modules code WITH nested modules`(@TempDir projectDir: File) {
         val result = projectDir.givenAProject("nested_modules")
 
-        result.output.shouldContainProjects(":moduleOne", ":parent:moduleTwo")
-
-        projectDir.modulesKt shouldBeEqualTo resourceText("expected/nested_modules/modules.kt")
+        result.shouldBeSuccess()
     }
+
 
 }
 
-private fun String.shouldContainProjects(vararg modules: String) {
-    modules.forEach {
-        this shouldContain "Project '$it'"
-    }
-}
+private fun BuildResult.shouldBeSuccess() =
+    task(":projects")!!.outcome shouldBeEqualTo SUCCESS
 
 private fun File.givenAProject(path: String, vararg extraParams: String): BuildResult {
     resource(path).copyRecursively(target = this)
@@ -83,21 +73,23 @@ private fun File.givenAProject(path: String, vararg extraParams: String): BuildR
 }
 
 /**
- * Kts files are compiled by the IDE, so adding the .nowarn extension to a failing file will allow to ignore it by the IDE. This will restore the file to it's former extension.
+ * Kts files are compiled by the IDE, so adding the .nowarn extension to a failing file will
+ * allow to ignore it by the IDE. This will restore the file to it's former extension.
  */
 private fun File.removeNoWarningExtensions() {
-    walkTopDown().onEach { file ->
+    walkTopDown().forEach { file ->
         if (file.extension == "nowarn") {
-            file.renameTo(File(file.absolutePath.replace(".nowarn", "")))
+            val newPath = file.absolutePath.replace(
+                oldValue = ".nowarn",
+                newValue = "",
+                ignoreCase = true
+            )
+            file.renameTo(File(newPath))
         }
     }
 }
 
-private val File.modulesKt: String
-    get() = File(this, "buildSrc/src/main/kotlin/modules.kt").readText()
-
 private fun resource(path: String): File = File(resourcesFile, path)
-private fun resourceText(path: String): String = File(resourcesFile, path).readText()
 
 private val resourcesFile = File(
     AutoModulePluginTest::class.java.classLoader.getResource(".")!!.path

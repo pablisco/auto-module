@@ -4,8 +4,8 @@ import org.gradle.api.Plugin
 import org.gradle.api.initialization.Settings
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
-import org.gradle.api.tasks.OutputFile
-import java.io.File
+import java.nio.file.Path
+import java.nio.file.Paths
 import kotlin.system.measureTimeMillis
 
 class AutoModulePlugin : Plugin<Settings> {
@@ -25,7 +25,8 @@ class AutoModulePlugin : Plugin<Settings> {
             }
             val timeTaken = measureTimeMillis {
                 modules.cleanup().writeTo(
-                    file = File(target.rootDir, AutoModuleExtension.output)
+                    directory = target.rootDir.toPath().resolve(AutoModuleExtension.path),
+                    fileName = AutoModuleExtension.modulesFileName
                 )
             }
             logger.lifecycle("[Auto-Module] Generated modules graph in ${timeTaken}ms")
@@ -34,13 +35,12 @@ class AutoModulePlugin : Plugin<Settings> {
 
 }
 
-
 private val logger: Logger by lazy { Logging.getLogger(Settings::class.java) }
 
 object AutoModuleExtension {
 
-    @OutputFile
-    var output = "buildSrc/src/main/kotlin/modules.kt"
+    var path: Path = Paths.get("buildSrc/src/main/kotlin/")
 
+    var modulesFileName = "modules"
 
 }
