@@ -37,7 +37,7 @@ class AutoModulePluginTest {
 
         result.output.shouldContainProjects(":singleModule")
 
-        projectDir.modulesKt shouldBeEqualTo resourceText("expected/single_module/modules.kt")
+        projectDir.modulesKt shouldBeEqualTo resourceText("expected/single_module/Modules.kt")
     }
 
     @Test
@@ -58,7 +58,7 @@ class AutoModulePluginTest {
 
         result.output.shouldContainProjects(":moduleOne", ":parent:moduleTwo")
 
-        projectDir.modulesKt shouldBeEqualTo resourceText("expected/nested_modules/modules.kt")
+        projectDir.modulesKt shouldBeEqualTo resourceText("expected/nested_modules/Modules.kt")
     }
 
 }
@@ -94,7 +94,7 @@ private fun File.removeNoWarningExtensions() {
 }
 
 private val File.modulesKt: String
-    get() = File(this, "buildSrc/src/main/kotlin/modules.kt").readText()
+    get() = File(this, "buildSrc/src/main/kotlin/Modules.kt").readText()
 
 private fun resource(path: String): File = File(resourcesFile, path)
 private fun resourceText(path: String): String = File(resourcesFile, path).readText()
