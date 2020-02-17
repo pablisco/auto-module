@@ -1,3 +1,3 @@
 plugins {
-    id("auto-module")
+    id("com.pablisco.gradle.automodule")
 }
