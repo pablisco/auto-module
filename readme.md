@@ -11,7 +11,7 @@ Remove all your `include()` calls inside `settings.gradle.[kts]` and add this:
 
 ```kotlin
 plugins {
-    id("auto-module")
+    id("com.pablisco.gradle.automodule")
 }
 ```
 
