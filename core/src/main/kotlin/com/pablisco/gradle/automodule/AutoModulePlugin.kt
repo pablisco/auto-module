@@ -31,7 +31,6 @@ class AutoModulePlugin : Plugin<Settings> {
             logger.lifecycle("[Auto-Module] Generated modules graph in ${timeTaken}ms")
         }
     }
-
 }
 
 
@@ -40,7 +39,5 @@ private val logger: Logger by lazy { Logging.getLogger(Settings::class.java) }
 object AutoModuleExtension {
 
     @OutputFile
-    var output = "buildSrc/src/main/kotlin/modules.kt"
-
-
+    var output = "buildSrc/src/main/kotlin/Modules.kt"
 }
