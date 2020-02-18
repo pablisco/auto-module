@@ -66,3 +66,15 @@ autoModule {
   ignore(":modulePath", ":some:other:module")
 }
 ```
+
+## Generated files
+
+By default, the generated code creates a file named `modules.kt` inside the `buildSrc` with all the necessary details to import local modules.
+
+If you want to change the name of this file you can do it like this inside `settings.gradle[.kts]`:
+
+```kotlin
+autoModule {
+  modulesFileName = "AutoModules"
+}
+```
