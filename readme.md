@@ -53,3 +53,16 @@ implementation(local.features.home)
 Note: This requires `buildSrc` to be enabled with the Kotlin dsl plugin as it is defined in this example: [multi-kotlin-project-with-buildSrc](https://github.com/gradle/kotlin-dsl-samples/tree/master/samples/multi-kotlin-project-with-buildSrc)
 
 Extra tip: Since `modules.kt` is generated each time the build is evaluated, it's possible to add it to `.gitignore` to avoid unnecessary changes when committing :)
+
+## Ignore modules
+
+If you want to make sure a module is not added to the Gradle graph you can do it in two ways:
+
+1. Add the `.ignore` extension to your `build.gradle[.kts]` script.
+2. Inside `settings.gradle[.kts]` it's possible to configure `autoModule` to ignore a module:
+
+```kotlin
+autoModule {
+  ignore(":modulePath", ":some:other:module")
+}
+```

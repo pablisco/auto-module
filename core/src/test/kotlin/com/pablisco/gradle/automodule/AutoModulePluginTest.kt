@@ -55,10 +55,12 @@ class AutoModulePluginTest {
     }
 
     @Test
-    fun `fails when using an ignored project is used`(@TempDir projectDir: File) {
+    fun `ignores modules`(@TempDir projectDir: File) {
         val result = projectDir.givenAProject("ignore_modules")
 
-        result.output shouldNotContain "Project ':moduleOne'"
+        result.output shouldNotContain "Project ':configIgnored'"
+        result.output shouldNotContain "Project ':extensionIgnored'"
+        result.output shouldContain "Project ':included'"
     }
 
 }
