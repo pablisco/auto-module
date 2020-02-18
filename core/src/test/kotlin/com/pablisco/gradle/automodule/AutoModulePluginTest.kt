@@ -2,6 +2,7 @@ package com.pablisco.gradle.automodule
 
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldContain
+import org.amshove.kluent.shouldNotContain
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome.SUCCESS
@@ -53,6 +54,12 @@ class AutoModulePluginTest {
         result.shouldBeSuccess()
     }
 
+    @Test
+    fun `fails when using an ignored project is used`(@TempDir projectDir: File) {
+        val result = projectDir.givenAProject("ignore_modules")
+
+        result.output shouldNotContain "Project ':moduleOne'"
+    }
 
 }
 
@@ -68,8 +75,8 @@ private fun File.givenAProject(path: String, vararg extraParams: String): BuildR
         .withProjectDir(this)
         .withPluginClasspath()
         .withArguments(*(arrayOf("projects", "--stacktrace") + extraParams))
+        .forwardOutput()
         .build()
-        .apply { println(output) }
 }
 
 /**

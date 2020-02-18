@@ -10,7 +10,7 @@ internal data class ModuleNode(
 
 internal fun File.lookupModules(): Sequence<ModuleNode> =
     walkTopDown()
-        .filter { file -> "build.gradle" in file.name }
+        .filter { it.isGroovyBuildScript() or it.isKotlinBuildScript() }
         .map { file -> file.parentFile }
         .filterNot { dir -> dir.startsWith(".") }
         .filterNot { dir -> dir.endsWith("buildSrc") }
@@ -19,6 +19,9 @@ internal fun File.lookupModules(): Sequence<ModuleNode> =
         .map { it.removePrefix(path) }
         .map { it.replace(File.separatorChar, ':') }
         .map { it.toNode() }
+
+private fun File.isGroovyBuildScript() = name == "build.gradle"
+private fun File.isKotlinBuildScript() = name == "build.gradle.kts"
 
 private fun String.toNode(): ModuleNode =
     split(":").filterNot(String::isBlank).toNode()
