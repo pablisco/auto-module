@@ -17,7 +17,7 @@ allprojects {
     }
 
     group = "com.pablisco.gradle.automodule"
-    version = "0.4"
+    version = "0.5"
 }
 
 tasks {

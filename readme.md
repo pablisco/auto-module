@@ -11,7 +11,7 @@ Remove all your `include()` calls inside `settings.gradle.[kts]` and add this:
 
 ```kotlin
 plugins {
-    id("com.pablisco.gradle.automodule") version "0.4"
+    id("com.pablisco.gradle.automodule") version "0.5"
 }
 ```
 
@@ -33,15 +33,22 @@ A file inside `buildSrc` will be created with the following code:
 val DependencyHandler.local: Local
     get() = Local(this)
 
-class Local(dh: DependencyHandler) {
+class Local(
+    dh: DependencyHandler
+) {
     val app = dh.project(":app")
     val features = Features(dh)
+    
+    class Features(
+        dh: dependencyHandler,
+        dependency: Dependency = dh.project(":features")
+    ) : Dependency by dependency  {
+        val home = dh.project(":features:home")
+        val settings = dh.project(":features:settings")
+    }
 }
 
-class Features(dh: dependencyHandler) {
-    val home = dh.project(":features:home")
-    val settings = dh.project(":features:settings")
-}
+
 ```
 
 This file will be accessible from any modules so we can add dependencies to other modules like:

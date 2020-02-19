@@ -50,7 +50,7 @@ private fun TypeSpec.Builder.write(node: ModuleNode) = node.apply {
         hasNoChildren() -> {
             addProperty(
                 property(name.snakeCase(), Dependency::class.asClassName())
-                    .initializer("""dh.project(":$path")""").build()
+                    .initializer("""dh.project("$path")""").build()
             )
         }
         hasChildren() -> {
@@ -70,5 +70,5 @@ private val dependencyHandlerProperty =
 
 private val ModuleNode.dependencyProperty
     get() = ParameterSpec.builder("dependency", Dependency::class.asClassName())
-        .defaultValue("""dh.project(":$path")""")
+        .defaultValue("""dh.project("$path")""")
         .build()
