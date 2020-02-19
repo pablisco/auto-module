@@ -12,6 +12,7 @@ class AutoModulePlugin : Plugin<Settings> {
         val autoModule = target.extensions.create("autoModule", AutoModule::class.java)
         logger.lifecycle("[Auto-Module] Starting")
         target.gradle.settingsEvaluated {
+            // need to evaluate the settings so it applies extension changes
             val timeTaken = measureTimeMillis {
                 target.evaluateModules(autoModule)
             }
@@ -20,23 +21,26 @@ class AutoModulePlugin : Plugin<Settings> {
     }
 
     private fun Settings.evaluateModules(autoModule: AutoModule) {
-        val modules = rootDir.lookupModules()
-            .filterNot { it.path in autoModule.ignored }
-            .toList()
+        val rootPath = rootDir.toPath()
+        val rootModule = rootPath.rootModule(
+            ignored = autoModule.ignored
+        )
 
         if (autoModule.ignored.isNotEmpty()) {
             logger.lifecycle("[Auto-Module] Ignoring modules: ${autoModule.ignored}")
         }
 
-        if (modules.isEmpty()) {
-            logger.lifecycle("[Auto-Module] No modules found in ${rootDir}")
+        if (rootModule.hasNoChildren()) {
+            logger.lifecycle("[Auto-Module] No modules found in $rootPath")
         } else {
-            modules.allModules.forEach {
-                logger.lifecycle("[Auto-Module] including $it")
-                include(it.path)
+            rootModule.walk().forEach { module ->
+                module.path?.let { path ->
+                    logger.lifecycle("[Auto-Module] including $path")
+                    include(path)
+                }
             }
-            modules.cleanup().writeTo(
-                directory = rootDir.toPath().resolve(autoModule.path),
+            rootModule.writeTo(
+                directory = rootPath.resolve(autoModule.path),
                 fileName = autoModule.modulesFileName
             )
         }

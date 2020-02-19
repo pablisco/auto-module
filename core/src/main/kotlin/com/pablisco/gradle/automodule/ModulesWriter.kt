@@ -5,47 +5,70 @@ import com.pablisco.gradle.automodule.utils.snakeCase
 import com.squareup.kotlinpoet.*
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.dsl.DependencyHandler
+import java.io.File
 import java.nio.file.Path
+import com.squareup.kotlinpoet.FileSpec.Companion.builder as file
+import com.squareup.kotlinpoet.FunSpec.Companion.constructorBuilder as constructor
+import com.squareup.kotlinpoet.FunSpec.Companion.getterBuilder as getter
+import com.squareup.kotlinpoet.PropertySpec.Companion.builder as property
+import com.squareup.kotlinpoet.TypeSpec.Companion.classBuilder as type
 
-internal fun Collection<ModuleNode>.writeTo(directory: Path, fileName: String) {
-    FileSpec.builder("", fileName).apply {
-        addImport("org.gradle.kotlin.dsl", "project")
-        addProperty(
-            PropertySpec.builder("local", ClassName("", "Local"))
-                .apply {
-                    receiver(DependencyHandler::class.asClassName())
-                    getter(
-                        FunSpec.getterBuilder()
-                            .addStatement("return Local(this)")
-                            .build()
-                    )
-                }.build()
-        )
-        addType(cleanup().toTypeSpec("Local"))
-        flatten().filterNot { it.children.isEmpty() }.forEach {
-            addType(it.children.toTypeSpec(it.name))
-        }
-    }.build().writeTo(directory)
-}
-
-private fun ModuleNode.toPropertySpec() = when (children.size) {
-    0 -> PropertySpec.builder(name.snakeCase(), Dependency::class.asClassName())
-        .initializer("""dh.project("$path")""")
-    else -> PropertySpec.builder(name.snakeCase(), ClassName.bestGuess(name.camelCase()))
-        .initializer("""${name.camelCase()}(dh)""")
-}.build()
-
-private fun Collection<ModuleNode>.toTypeSpec(name: String) =
-    TypeSpec.classBuilder(name.camelCase())
-        .primaryConstructor(
-            FunSpec.constructorBuilder()
-                .addParameter(ParameterSpec("dh", DependencyHandler::class.asClassName()))
+internal fun ModuleNode.writeTo(directory: Path, fileName: String) {
+    file("", fileName)
+        .addImport("org.gradle.kotlin.dsl", "project")
+        .addProperty(
+            property("local", ClassName("", "Local"))
+                .receiver(DependencyHandler::class.asClassName())
+                .getter(getter().addStatement("return Local(this)").build())
                 .build()
         )
-        .addProperties(map { it.toPropertySpec() })
-        .build()
+        .addType(ModuleNode("Local", null, children).toType())
+        .build().writeTo(directory)
+}
 
-private fun Collection<ModuleNode>.flatten(): Sequence<ModuleNode> =
-    fold(emptySequence()) { acc, it ->
-        acc + it + it.children
+private fun ModuleNode.toType(): TypeSpec =
+    type(name.camelCase()).apply {
+        if (hasNoChildren() || path == null) {
+            primaryConstructor(constructor().addParameter(dependencyHandlerProperty).build())
+        } else {
+            primaryConstructor(
+                constructor()
+                    .addParameter(dependencyHandlerProperty)
+                    .addParameter(dependencyProperty)
+                    .build()
+            )
+            addSuperinterface(
+                Dependency::class.asClassName(),
+                delegate = CodeBlock.of("dependency")
+            )
+        }
+        children.forEach { child -> write(child) }
+    }.build()
+
+private fun TypeSpec.Builder.write(node: ModuleNode) = node.apply {
+    when {
+        hasNoChildren() -> {
+            addProperty(
+                property(name.snakeCase(), Dependency::class.asClassName())
+                    .initializer("""dh.project(":$path")""").build()
+            )
+        }
+        hasChildren() -> {
+            addType(toType())
+            addProperty(
+                property(name.snakeCase(), ClassName.bestGuess(name.camelCase()))
+                    .initializer("""${name.camelCase()}(dh)""").build()
+            )
+        }
     }
+}
+
+fun Path.toGradleCoordinates(): String = ":" + toString().replace(File.separatorChar, ':')
+
+private val dependencyHandlerProperty =
+    ParameterSpec("dh", DependencyHandler::class.asClassName())
+
+private val ModuleNode.dependencyProperty
+    get() = ParameterSpec.builder("dependency", Dependency::class.asClassName())
+        .defaultValue("""dh.project(":$path")""")
+        .build()

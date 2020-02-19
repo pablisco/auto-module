@@ -5,4 +5,5 @@ plugins {
 dependencies {
     implementation(local.moduleOne)
     implementation(local.parent.moduleTwo)
+    implementation(local.parent.moduleTwo.nested)
 }
