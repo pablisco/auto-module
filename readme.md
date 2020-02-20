@@ -13,7 +13,7 @@ Remove all your `include()` calls inside `settings.gradle.[kts]` and add this:
 
 ```kotlin
 plugins {
-    id("com.pablisco.gradle.automodule") version "0.5"
+    id("com.pablisco.gradle.automodule") version "0.6"
 }
 ```
 
@@ -113,6 +113,10 @@ implementation(banana.features.home)
 ```
 
 Note: The casing of the provided name will no be changed.
+
+Another note: Certain names (like "modules") are not allowed since we use `DependencyHandler`
+to namespace the root module and it already has a `modules` property defined as a Java method 
+with name `getModules`. 
 
 ## Legacy Groovy Script support
 

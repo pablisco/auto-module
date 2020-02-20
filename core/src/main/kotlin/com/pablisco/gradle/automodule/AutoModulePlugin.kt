@@ -2,25 +2,28 @@ package com.pablisco.gradle.automodule
 
 import com.pablisco.gradle.automodule.utils.camelCase
 import org.gradle.api.Plugin
+import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.initialization.Settings
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
-import kotlin.system.measureTimeMillis
+import java.lang.reflect.Method
+import kotlin.reflect.KCallable
+import kotlin.reflect.KClass
+import kotlin.reflect.full.declaredMemberProperties
+import kotlin.reflect.full.memberExtensionProperties
+import kotlin.reflect.full.memberProperties
 
 class AutoModulePlugin : Plugin<Settings> {
 
     override fun apply(target: Settings) {
         val autoModule = target.extensions.create("autoModule", AutoModule::class.java)
-        logger.lifecycle("[Auto-Module] Starting")
         if (autoModule.ignored.isNotEmpty()) {
-            logger.lifecycle("[Auto-Module] Ignoring modules: ${autoModule.ignored}")
+            autoModule.log("[Auto-Module] Ignoring modules: ${autoModule.ignored}")
         }
+        // need to evaluate the settings so it applies user defined configuration
         target.gradle.settingsEvaluated {
-            // need to evaluate the settings so it applies extension changes
-            val timeTaken = measureTimeMillis {
-                target.evaluateModules(autoModule)
-            }
-            logger.lifecycle("[Auto-Module] Generated modules graph in ${timeTaken}ms")
+            autoModule.checkRootNameForShadows()
+            it.evaluateModules(autoModule)
         }
     }
 
@@ -31,11 +34,11 @@ class AutoModulePlugin : Plugin<Settings> {
         )
 
         if (rootModule.hasNoChildren()) {
-            logger.lifecycle("[Auto-Module] No modules found in $rootDir")
+            autoModule.log("[Auto-Module] No modules found in $rootDir")
         } else {
             rootModule.walk().forEach { module ->
                 module.path?.let { path ->
-                    logger.lifecycle("[Auto-Module] including $path")
+                    autoModule.log("[Auto-Module] including $path")
                     include(path)
                 }
             }
@@ -53,6 +56,33 @@ class AutoModulePlugin : Plugin<Settings> {
             }
         }
     }
+
+    private fun AutoModule.log(message: String) {
+        logger.log(logLevel, message)
+    }
+
+
 }
 
-private val logger: Logger by lazy { Logging.getLogger(Settings::class.java) }
+private val logger: Logger by lazy { Logging.getLogger(AutoModulePlugin::class.java) }
+
+/**
+ * Can't use names like "modules" since [DependencyHandler] already has a function
+ * called [DependencyHandler.getModules] which is represented as a property in Kotlin.
+ */
+private fun AutoModule.checkRootNameForShadows() {
+    val type = DependencyHandler::class
+    check(
+        type.allProperties.none { it.name == rootModuleName } &&
+                type.allJavaMethods.none { it.name == "get${rootModuleName.capitalize()}" }
+    ) {
+        "Can't use \"$rootModuleName\" as \"rootModuleName\" since " +
+                "DependencyHandler already has that property"
+    }
+}
+
+private val KClass<*>.allProperties: List<KCallable<*>>
+    get() = declaredMemberProperties + memberProperties + memberExtensionProperties
+
+private val KClass<*>.allJavaMethods: Array<Method>
+    get() = java.methods + java.declaredMethods
