@@ -1,5 +1,6 @@
 package com.pablisco.gradle.automodule
 
+import com.pablisco.gradle.automodule.utils.camelCase
 import org.gradle.api.Plugin
 import org.gradle.api.initialization.Settings
 import org.gradle.api.logging.Logger
@@ -25,7 +26,8 @@ class AutoModulePlugin : Plugin<Settings> {
 
     private fun Settings.evaluateModules(autoModule: AutoModule) {
         val rootModule: ModuleNode = rootDir.toPath().rootModule(
-            ignored = autoModule.ignored
+            ignored = autoModule.ignored,
+            name = autoModule.rootModuleName.camelCase()
         )
 
         if (rootModule.hasNoChildren()) {
@@ -39,11 +41,15 @@ class AutoModulePlugin : Plugin<Settings> {
             }
             rootModule.writeTo(
                 directory = rootDir.toPath().resolve(autoModule.path),
-                fileName = autoModule.modulesFileName
+                fileName = autoModule.modulesFileName,
+                rootModuleName = autoModule.rootModuleName
             )
 
             gradle.beforeProject { project ->
-                project.extensions.add("local", GroovyRootModule(project.dependencies))
+                project.extensions.add(
+                    autoModule.rootModuleName,
+                    GroovyRootModule(project.dependencies)
+                )
             }
         }
     }

@@ -86,6 +86,34 @@ autoModule {
 }
 ```
 
+This mans that, instead of generating a file called `modules.kt` it will generate one called `AutoModules.kt`.
+
+## Custom root module name
+
+By default, the root module is named `local`. However, it's possible to define a custom name:
+
+```kotlin
+autoModule {
+
+    rootModuleName = "banana"
+
+}
+```
+
+This means that instead of calling:
+
+```kotlin
+implementation(local.features.home)
+```
+
+you'll be able to call:
+
+```kotlin
+implementation(banana.features.home)
+```
+
+Note: The casing of the provided name will no be changed.
+
 ## Legacy Groovy Script support
 
 When you have a large project, it may be possible to migrate all scripts to Kotlin.

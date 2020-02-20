@@ -70,6 +70,13 @@ class AutoModulePluginTest {
         result.shouldBeSuccess()
     }
 
+    @Test
+    fun `can change root module name`(@TempDir projectDir: File) {
+        val result = projectDir.givenAProject("custom_root_module_name")
+
+        result.shouldBeSuccess()
+    }
+
 }
 
 private fun BuildResult.shouldBeSuccess() =

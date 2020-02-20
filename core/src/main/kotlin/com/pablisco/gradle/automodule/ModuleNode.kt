@@ -13,9 +13,10 @@ internal data class ModuleNode(
 )
 
 internal fun Path.rootModule(
-    ignored: List<String>
+    ignored: List<String>,
+    name: String
 ) = ModuleNode(
-    name = "Local",
+    name = name,
     path = null,
     children = findChildModules(ignored)
 )

@@ -13,16 +13,21 @@ import com.squareup.kotlinpoet.FunSpec.Companion.getterBuilder as getter
 import com.squareup.kotlinpoet.PropertySpec.Companion.builder as property
 import com.squareup.kotlinpoet.TypeSpec.Companion.classBuilder as type
 
-internal fun ModuleNode.writeTo(directory: Path, fileName: String) {
+internal fun ModuleNode.writeTo(
+    directory: Path,
+    fileName: String,
+    rootModuleName: String
+) {
+    val rootTypeName = rootModuleName.camelCase()
     file("", fileName)
         .addImport("org.gradle.kotlin.dsl", "project")
         .addProperty(
-            property("local", ClassName("", "Local"))
+            property(rootModuleName, ClassName("", rootTypeName))
                 .receiver(DependencyHandler::class.asClassName())
-                .getter(getter().addStatement("return Local(this)").build())
+                .getter(getter().addStatement("return $rootTypeName(this)").build())
                 .build()
         )
-        .addType(ModuleNode("Local", null, children).toType())
+        .addType(ModuleNode(rootTypeName, null, children).toType())
         .build().writeTo(directory)
 }
 
