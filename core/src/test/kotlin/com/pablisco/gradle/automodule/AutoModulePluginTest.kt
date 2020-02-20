@@ -63,6 +63,13 @@ class AutoModulePluginTest {
         result.output shouldContain "Project ':included'"
     }
 
+    @Test
+    fun `can use from groovy gradle script`(@TempDir projectDir: File) {
+        val result = projectDir.givenAProject("groovy_support")
+
+        result.shouldBeSuccess()
+    }
+
 }
 
 private fun BuildResult.shouldBeSuccess() =

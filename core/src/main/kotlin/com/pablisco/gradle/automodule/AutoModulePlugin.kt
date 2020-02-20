@@ -11,6 +11,9 @@ class AutoModulePlugin : Plugin<Settings> {
     override fun apply(target: Settings) {
         val autoModule = target.extensions.create("autoModule", AutoModule::class.java)
         logger.lifecycle("[Auto-Module] Starting")
+        if (autoModule.ignored.isNotEmpty()) {
+            logger.lifecycle("[Auto-Module] Ignoring modules: ${autoModule.ignored}")
+        }
         target.gradle.settingsEvaluated {
             // need to evaluate the settings so it applies extension changes
             val timeTaken = measureTimeMillis {
@@ -21,17 +24,12 @@ class AutoModulePlugin : Plugin<Settings> {
     }
 
     private fun Settings.evaluateModules(autoModule: AutoModule) {
-        val rootPath = rootDir.toPath()
-        val rootModule = rootPath.rootModule(
+        val rootModule: ModuleNode = rootDir.toPath().rootModule(
             ignored = autoModule.ignored
         )
 
-        if (autoModule.ignored.isNotEmpty()) {
-            logger.lifecycle("[Auto-Module] Ignoring modules: ${autoModule.ignored}")
-        }
-
         if (rootModule.hasNoChildren()) {
-            logger.lifecycle("[Auto-Module] No modules found in $rootPath")
+            logger.lifecycle("[Auto-Module] No modules found in $rootDir")
         } else {
             rootModule.walk().forEach { module ->
                 module.path?.let { path ->
@@ -40,12 +38,15 @@ class AutoModulePlugin : Plugin<Settings> {
                 }
             }
             rootModule.writeTo(
-                directory = rootPath.resolve(autoModule.path),
+                directory = rootDir.toPath().resolve(autoModule.path),
                 fileName = autoModule.modulesFileName
             )
+
+            gradle.beforeProject { project ->
+                project.extensions.add("local", GroovyRootModule(project.dependencies))
+            }
         }
     }
 }
 
 private val logger: Logger by lazy { Logging.getLogger(Settings::class.java) }
-

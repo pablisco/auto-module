@@ -1,6 +1,8 @@
 # [WIP] Auto Module
 
-![https://github.com/pablisco/auto-module/actions](https://github.com/pablisco/auto-module/workflows/Main/badge.svg)
+[![Actions](https://github.com/pablisco/auto-module/workflows/Main/badge.svg)](https://github.com/pablisco/auto-module/actions)
+
+
 
 
 This Gradle plugin helps with module declaration. And by help, it means it does it all for you.
@@ -27,7 +29,7 @@ root
     \-- settings
 ```
 
-A file inside `buildSrc` will be created with the following code:
+A file inside `buildSrc` is be created with the following code:
 
 ```kotlin
 val DependencyHandler.local: Local
@@ -47,11 +49,9 @@ class Local(
         val settings = dh.project(":features:settings")
     }
 }
-
-
 ```
 
-This file will be accessible from any modules so we can add dependencies to other modules like:
+This file will be accessible from any modules so you can add dependencies to other modules like:
 
 ```kotlin
 implementation(local.features.home)
@@ -65,7 +65,7 @@ Extra tip: Since `modules.kt` is generated each time the build is evaluated, it'
 
 If you want to make sure a module is not added to the Gradle graph you can do it in two ways:
 
-1. Add the `.ignore` extension to your `build.gradle[.kts]` script.
+1. Adding the `.ignore` extension at the end of the `build.gradle[.kts]` script.
 2. Inside `settings.gradle[.kts]` it's possible to configure `autoModule` to ignore a module:
 
 ```kotlin
@@ -85,3 +85,15 @@ autoModule {
   modulesFileName = "AutoModules"
 }
 ```
+
+## Legacy Groovy Script support
+
+When you have a large project, it may be possible to migrate all scripts to Kotlin.
+It's possible to use the same semantics as we have in Kotlin in Groovy scripts:
+
+```groovy
+implementation(local.features.home)
+```
+
+This allows to have a smooth migration to Kotlin Scripts in the future but remain with minimum 
+changes in the remaining scripts.
