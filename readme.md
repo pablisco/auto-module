@@ -1,4 +1,4 @@
-# [WIP] Auto Module
+# Auto Module
 
 [![Actions](https://github.com/pablisco/auto-module/workflows/Main/badge.svg)](https://github.com/pablisco/auto-module/actions)
 
