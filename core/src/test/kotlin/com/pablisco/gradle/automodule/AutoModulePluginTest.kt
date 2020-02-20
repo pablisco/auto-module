@@ -13,22 +13,11 @@ import java.io.File
 class AutoModulePluginTest {
 
     @Test
-    fun `notifies plugin lifecycle WHEN no modules available`(@TempDir projectDir: File) {
+    fun `notifies WHEN no modules available`(@TempDir projectDir: File) {
         val result = projectDir.givenAProject("no_modules")
 
         with(result) {
-            output shouldContain "[Auto-Module] Starting"
             output shouldContain "[Auto-Module] No modules found in "
-        }
-    }
-
-    @Test
-    fun `notifies plugin lifecycle WHEN modules are available`(@TempDir projectDir: File) {
-        val result = projectDir.givenAProject("single_module")
-
-        with(result) {
-            output shouldContain "[Auto-Module] Starting"
-            output shouldContain "[Auto-Module] Generated modules graph in "
         }
     }
 

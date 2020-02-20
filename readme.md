@@ -1,7 +1,7 @@
 # Auto Module
 
-[![Actions](https://github.com/pablisco/auto-module/workflows/Main/badge.svg)](https://github.com/pablisco/auto-module/actions)
-
+[![Actions](https://github.com/pablisco/auto-module/workflows/Publish/badge.svg)](https://github.com/pablisco/auto-module/actions) 
+[![Gradle Plugin Portal](https://img.shields.io/maven-metadata/v/https/plugins.gradle.org/m2/com/pablisco/gradle/automodule/core/maven-metadata.xml.svg?label=Gradle)](https://plugins.gradle.org/plugin/com.pablisco.gradle.automodule)
 
 
 
@@ -13,7 +13,7 @@ Remove all your `include()` calls inside `settings.gradle.[kts]` and add this:
 
 ```kotlin
 plugins {
-    id("com.pablisco.gradle.automodule") version "0.6"
+    id("com.pablisco.gradle.automodule") version "[latest.version]"
 }
 ```
 
