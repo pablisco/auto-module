@@ -11,7 +11,7 @@ internal class AutoModuleScope(private val delegate: Settings) : Settings by del
     private val localBuild: Path = buildSrc.resolve("build/autoModule")
     internal val codeOutputDirectory: Path = buildSrc.resolve("src/main/kotlin/")
     internal val checkSumFile: File = localBuild.resolve("checksum").toFile()
-    internal val cacheChecksum: String? = checkSumFile.takeIf { it.exists() }?.readText()
+    internal val cacheChecksum: String? get() = checkSumFile.takeIf { it.exists() }?.readText()
 
     val autoModule: AutoModule =
         extensions.create("autoModule", AutoModule::class.java)
