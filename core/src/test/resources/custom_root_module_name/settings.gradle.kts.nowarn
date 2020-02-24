@@ -3,7 +3,5 @@ plugins {
 }
 
 autoModule {
-
-    rootModuleName = "banana"
-
+    entryPointName = "banana"
 }

@@ -27,7 +27,6 @@ tasks {
     withType<KotlinCompile>().configureEach {
         kotlinOptions.jvmTarget = "1.8"
     }
-
     processTestResources.dependsOn(register<Copy>("copyTestResources") {
         from("${projectDir}/src/test/resources")
         into("${buildDir}/classes/kotlin/test")
@@ -36,7 +35,7 @@ tasks {
 
 val sourcesJar = tasks.register<Jar>("sourcesJar") {
     archiveClassifier.set("sources")
-    from(sourceSets.main.get().allSource)
+    from(sourceSets.main { allSource })
 }
 
 publishing {

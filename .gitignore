@@ -13,7 +13,7 @@
 .idea/**/gradle.xml
 .idea/**/libraries
 .gradle
-/build
+**/build
 
 # Not required with Gradle auto import
 .idea/artifacts
@@ -23,6 +23,7 @@
 .idea/modules
 .idea/misc.xml
 .idea/vcs.xml
+.idea/.name
 *.iml
 *.ipr
 

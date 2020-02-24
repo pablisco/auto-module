@@ -2,6 +2,7 @@ package com.pablisco.gradle.automodule
 
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldContain
+import org.amshove.kluent.shouldNotBeEqualTo
 import org.amshove.kluent.shouldNotContain
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
@@ -9,21 +10,17 @@ import org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.attribute.FileTime
 
 class AutoModulePluginTest {
 
     @Test
-    fun `notifies WHEN no modules available`(@TempDir projectDir: File) {
-        val result = projectDir.givenAProject("no_modules")
-
-        with(result) {
-            output shouldContain "[Auto-Module] No modules found in "
-        }
-    }
-
-    @Test
     fun `generates modules code WITH single module`(@TempDir projectDir: File) {
-        val result = projectDir.givenAProject("single_module")
+        projectDir.copyProject("single_module")
+
+        val result = projectDir.runGradle()
 
         result.shouldBeSuccess()
     }
@@ -31,21 +28,27 @@ class AutoModulePluginTest {
 
     @Test
     fun `generates modules code WITH multiple modules`(@TempDir projectDir: File) {
-        val result = projectDir.givenAProject("multiple_modules")
+        projectDir.copyProject("multiple_modules")
+
+        val result = projectDir.runGradle()
 
         result.shouldBeSuccess()
     }
 
     @Test
     fun `generates modules code WITH nested modules`(@TempDir projectDir: File) {
-        val result = projectDir.givenAProject("nested_modules")
+        projectDir.copyProject("nested_modules")
+
+        val result = projectDir.runGradle()
 
         result.shouldBeSuccess()
     }
 
     @Test
     fun `ignores modules`(@TempDir projectDir: File) {
-        val result = projectDir.givenAProject("ignore_modules")
+        projectDir.copyProject("ignore_modules")
+
+        val result = projectDir.runGradle()
 
         result.output shouldNotContain "Project ':configIgnored'"
         result.output shouldNotContain "Project ':extensionIgnored'"
@@ -54,35 +57,71 @@ class AutoModulePluginTest {
 
     @Test
     fun `can use from groovy gradle script`(@TempDir projectDir: File) {
-        val result = projectDir.givenAProject("groovy_support")
+        projectDir.copyProject("groovy_support")
+
+        val result = projectDir.runGradle()
 
         result.shouldBeSuccess()
     }
 
     @Test
     fun `can change root module name`(@TempDir projectDir: File) {
-        val result = projectDir.givenAProject("custom_root_module_name")
+        projectDir.copyProject("custom_root_module_name")
+
+        val result = projectDir.runGradle()
 
         result.shouldBeSuccess()
     }
 
+    @Suppress("EXPERIMENTAL_API_USAGE")
+    @Test
+    fun `no code generation occurs with cache enabled`(@TempDir projectDir: File) {
+        projectDir.copyProject("single_module")
+
+        projectDir.runGradle()
+        val initialRunLastModified = projectDir.modulesKt.lastModified
+        projectDir.runGradle()
+        val cachedRunLastModified = projectDir.modulesKt.lastModified
+
+        initialRunLastModified shouldBeEqualTo cachedRunLastModified
+    }
+
+    @Suppress("EXPERIMENTAL_API_USAGE")
+    @Test
+    fun `code generation occurs with cache is not enabled`(@TempDir projectDir: File) {
+        projectDir.copyProject("cache_disabled")
+
+        projectDir.runGradle()
+        val initialRunLastModified = projectDir.modulesKt.lastModified
+        projectDir.runGradle()
+        val secondRunLastModified = projectDir.modulesKt.lastModified
+
+        initialRunLastModified shouldNotBeEqualTo secondRunLastModified
+    }
+
 }
+
+private val File.modulesKt: Path
+    get() = toPath().resolve("buildSrc/src/main/kotlin/modules.kt")
+
+private val Path.lastModified: FileTime
+    get() = Files.getLastModifiedTime(this)
 
 private fun BuildResult.shouldBeSuccess() =
     task(":projects")!!.outcome shouldBeEqualTo SUCCESS
 
-private fun File.givenAProject(path: String, vararg extraParams: String): BuildResult {
-    resource(path).copyRecursively(target = this)
-
+private fun File.copyProject(path: String) {
+    resource(path).copyRecursively(target = this, overwrite = true)
     removeNoWarningExtensions()
+}
 
-    return GradleRunner.create()
+private fun File.runGradle(vararg args: String = emptyArray()): BuildResult =
+    GradleRunner.create()
         .withProjectDir(this)
         .withPluginClasspath()
-        .withArguments(*(arrayOf("projects", "--stacktrace") + extraParams))
+        .withArguments(listOf("projects", "--stacktrace") + args)
         .forwardOutput()
         .build()
-}
 
 /**
  * Kts files are compiled by the IDE, so adding the .nowarn extension to a failing file will
