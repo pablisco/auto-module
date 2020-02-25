@@ -34,3 +34,4 @@
 
 # Mac OS
 .DS_Store
+/buildSrc/src/main/kotlin/modules.kt

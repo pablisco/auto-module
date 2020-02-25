@@ -1,2 +1,5 @@
 rootProject.name = "auto-module"
-include(":core")
+
+plugins {
+    id("com.pablisco.gradle.automodule") version "0.8"
+}
