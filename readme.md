@@ -157,3 +157,19 @@ changes in the mean time.
 
 If you want to keep using Gradle with Groovy scripts, instead of Kotlin, this plugin will still
 work. However, you still need to add support for kotlin in `buildSrc/build.gradle`.
+
+## History 
+
+All this started with this Gist:
+
+https://gist.github.com/pablisco/e50c792f1febb77af0fbc2d4f8f2810e
+
+And this tweet:
+ 
+ https://twitter.com/pablisc0/status/1227933148622860289
+ 
+Couple of weeks of sleepless evening, and auto-module was born.
+
+## License 
+
+This project is licensed under the MIT License - see the [license.md](license.md) file for details
