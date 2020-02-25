@@ -1,9 +1,0 @@
-plugins {
-    kotlin("jvm") version "1.3.61"
-}
-
-dependencies {
-    implementation(local.moduleOne)
-    implementation(local.parent.moduleTwo)
-    implementation(local.parent.moduleTwo.nested)
-}

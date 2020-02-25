@@ -14,3 +14,17 @@ internal fun Path.list(): Sequence<Path> = when {
 
 internal val Path.name: String
     get() = fileName.toString()
+
+internal fun Path.exists(): Boolean = Files.exists(this)
+
+@Suppress("PlatformExtensionReceiverOfInline")
+internal fun Path.readText(): String? = Files.readAllLines(this).joinToString("\n")
+
+internal fun Path.createFile(content: String) {
+    Files.createDirectories(parent)
+    if (Files.exists(this)) {
+        Files.delete(this)
+    }
+    Files.createFile(this)
+    Files.write(this, content.toByteArray())
+}

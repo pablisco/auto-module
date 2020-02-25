@@ -8,10 +8,11 @@ internal fun String.snakeCase(): String =
         .mapIndexed { index, s -> if (index == 0) s else s.capitalize() }
         .joinToString("")
 
-private fun String.sanitize(replacement: Char = ' '): String = toCharArray().joinToString("") { c ->
-    when {
-        !c.isJavaIdentifierPart() -> replacement
-        this[0] == c && !c.isJavaIdentifierStart() -> replacement
-        else -> c
-    }.toString()
-}
+private fun String.sanitize(replacement: Char = ' '): String =
+    toCharArray().joinToString("") { c ->
+        when {
+            !c.isJavaIdentifierPart() -> replacement
+            this[0] == c && !c.isJavaIdentifierStart() -> replacement
+            else -> c
+        }.toString()
+    }

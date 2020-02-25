@@ -1,7 +1,0 @@
-plugins {
-    id("com.pablisco.gradle.automodule")
-}
-
-autoModule {
-    entryPointName = "banana"
-}

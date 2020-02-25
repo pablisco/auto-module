@@ -1,9 +1,0 @@
-import org.gradle.api.internal.plugins.ExtensionContainerInternal
-
-plugins {
-    id("com.pablisco.gradle.automodule")
-}
-
-autoModule {
-    ignore(":configIgnored")
-}

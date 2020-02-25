@@ -11,6 +11,9 @@ import org.gradle.api.logging.Logging
 class AutoModulePlugin : Plugin<Settings> {
 
     override fun apply(target: Settings) {
+        check(target.rootDir.resolve("buildSrc/build.gradle.kts").exists()) {
+            "Missing buildSrc/build.gradle.kts, this is required by autoModule"
+        }
         val autoModuleScope = AutoModuleScope(target)
         // need to evaluate the settings so it applies user defined configuration
         target.gradle.settingsEvaluated {
@@ -70,7 +73,7 @@ private fun AutoModuleScope.isCached(): Boolean =
     cacheChecksum.let { "${rootModule.hashcode()}" == it }
 
 private fun AutoModuleScope.saveCachedChecksum() {
-    checkSumFile.createFile(content = "${rootModule.hashcode()}")
+    checkSumLocation.createFile(content = "${rootModule.hashcode()}")
 }
 
 private fun AutoModuleScope.includeModulesToSettings() {
