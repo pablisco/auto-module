@@ -2,6 +2,7 @@ package com.pablisco.gradle.automodule.utils
 
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.attribute.FileAttribute
 import kotlin.streams.asSequence
 
 internal fun Path.walk(): Sequence<Path> =
@@ -28,3 +29,7 @@ internal fun Path.createFile(content: String) {
     Files.createFile(this)
     Files.write(this, content.toByteArray())
 }
+
+internal fun Path.createDirectories(
+    vararg fileAttributes: FileAttribute<*> = emptyArray()
+): Path = Files.createDirectories(this, *fileAttributes)

@@ -1,12 +1,14 @@
 package com.pablisco.gradle.automodule
 
+import com.pablisco.gradle.automodule.filetree.fileTree
+import com.pablisco.gradle.automodule.gradle.buildSrcModule
+import com.pablisco.gradle.automodule.gradle.defaultSettingsGradleScript
+import com.pablisco.gradle.automodule.gradle.runGradleProjects
+import com.pablisco.gradle.automodule.gradle.shouldBeSuccess
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldContain
 import org.amshove.kluent.shouldNotBeEqualTo
 import org.amshove.kluent.shouldNotContain
-import org.gradle.testkit.runner.BuildResult
-import org.gradle.testkit.runner.GradleRunner
-import org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Files
@@ -31,7 +33,7 @@ class AutoModulePluginTest {
             }
         }
 
-        val result = projectDir.runGradle()
+        val result = projectDir.runGradleProjects()
 
         result.shouldBeSuccess()
     }
@@ -56,7 +58,7 @@ class AutoModulePluginTest {
             }
         }
 
-        val result = projectDir.runGradle()
+        val result = projectDir.runGradleProjects()
 
         result.shouldBeSuccess()
     }
@@ -87,7 +89,7 @@ class AutoModulePluginTest {
             }
         }
 
-        val result = projectDir.runGradle()
+        val result = projectDir.runGradleProjects()
 
         result.shouldBeSuccess()
     }
@@ -113,7 +115,7 @@ class AutoModulePluginTest {
             }
         }
 
-        val result = projectDir.runGradle()
+        val result = projectDir.runGradleProjects()
 
         result.output shouldNotContain "Project ':configIgnored'"
         result.output shouldNotContain "Project ':extensionIgnored'"
@@ -141,7 +143,7 @@ class AutoModulePluginTest {
             }
         }
 
-        val result = projectDir.runGradle()
+        val result = projectDir.runGradleProjects()
 
         result.shouldBeSuccess()
     }
@@ -166,7 +168,7 @@ class AutoModulePluginTest {
             }
         }
 
-        val result = projectDir.runGradle()
+        val result = projectDir.runGradleProjects()
 
         result.shouldBeSuccess()
     }
@@ -187,9 +189,9 @@ class AutoModulePluginTest {
             }
         }
 
-        projectDir.runGradle()
+        projectDir.runGradleProjects()
         val initialRunLastModified = projectDir.modulesKt.lastModified
-        projectDir.runGradle()
+        projectDir.runGradleProjects()
         val cachedRunLastModified = projectDir.modulesKt.lastModified
 
         initialRunLastModified shouldBeEqualTo cachedRunLastModified
@@ -216,9 +218,9 @@ class AutoModulePluginTest {
             }
         }
 
-        projectDir.runGradle()
+        projectDir.runGradleProjects()
         val initialRunLastModified = projectDir.modulesKt.lastModified
-        projectDir.runGradle()
+        projectDir.runGradleProjects()
         val secondRunLastModified = projectDir.modulesKt.lastModified
 
         initialRunLastModified shouldNotBeEqualTo secondRunLastModified
@@ -226,34 +228,8 @@ class AutoModulePluginTest {
 
 }
 
-private fun FileTreeScope.buildSrcModule() {
-    "buildSrc" {
-        "build.gradle.kts" += """
-            repositories { jcenter() }
-            plugins { `kotlin-dsl` }
-        """.trimIndent()
-    }
-}
-
 private val Path.modulesKt: Path
     get() = resolve("buildSrc/src/main/kotlin/modules.kt")
 
 private val Path.lastModified: FileTime
     get() = Files.getLastModifiedTime(this)
-
-private fun BuildResult.shouldBeSuccess() =
-    task(":projects")!!.outcome shouldBeEqualTo SUCCESS
-
-private fun Path.runGradle(vararg args: String = emptyArray()): BuildResult =
-    GradleRunner.create()
-        .withProjectDir(this.toFile())
-        .withPluginClasspath()
-        .withArguments(listOf("projects", "--stacktrace") + args)
-        .forwardOutput()
-        .build()
-
-val defaultSettingsGradleScript = """
-    plugins {
-        id("com.pablisco.gradle.automodule")
-    }
-""".trimIndent()

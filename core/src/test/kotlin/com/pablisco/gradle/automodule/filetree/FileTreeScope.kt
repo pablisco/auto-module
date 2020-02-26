@@ -1,4 +1,4 @@
-package com.pablisco.gradle.automodule
+package com.pablisco.gradle.automodule.filetree
 
 import java.nio.file.Files
 import java.nio.file.Path

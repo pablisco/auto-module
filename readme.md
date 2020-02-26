@@ -3,20 +3,20 @@
 [![Actions](https://github.com/pablisco/auto-module/workflows/Publish/badge.svg)](https://github.com/pablisco/auto-module/actions) 
 [![Gradle Plugin Portal](https://img.shields.io/maven-metadata/v/https/plugins.gradle.org/m2/com/pablisco/gradle/automodule/core/maven-metadata.xml.svg?label=Gradle)](https://plugins.gradle.org/plugin/com.pablisco.gradle.automodule)
 
-This Gradle plugin helps with module declaration. And by help, it means it does it all for you.
+This Gradle plugin helps with module dependencies. And by help, it means it does the hard work for you.
 
 ## Why do I need this?
 
-So, these are some (but not all) the reasons why you should use this:
+So, these are some (but not all) of the reasons why you should use this:
 
  - __Avoid user error:__ It's quite common, specially with complex projects, to have a large and nested project graph with all the available modules. Updating it can be tedious and, frankly, you probably rather be doing other things.
  - __Type safety:__ After you rename a module, any reference to it will complain when evaluating the project's build, so you know where you need to change your dependencies.
- - __IDE Auto-complete:__ One of the benefits of using `kts` build scripts is that the IDE can provide auto complete. This will save you multiple trips to the settings.gradle script or the project structure to remember the name of the module you require.
+ - __IDE Auto-complete:__ One of the benefits of using `kts` build scripts is that the IDE can provide auto complete. This will save you multiple trips to the `settings.gradle[.kt]` script or the project structure to remember the name of the module you are looking for.
  - __Progressive upgrade:__ It has support for Groovy gradle so you don't have to migrate all your modules to use kts if you are not quite there yet or don't need it on all of them.
  
 ## How do I use it?
 
-Remove all your `include()` calls inside `settings.gradle.[kts]` and add this:
+Remove all your `include()` instructions inside `settings.gradle.[kts]` and add this:
 
 ```kotlin
 plugins {
@@ -27,7 +27,7 @@ plugins {
 And that's it!
 
 At least from the settings script sense. Now you will probably want to convert all the local project
-dependencies to use type safety now!
+dependencies to use the type safe graph!
 
 If you have a project with the following structure:
 
@@ -61,7 +61,7 @@ class Local(
 }
 ```
 
-This file will be accessible from any modules so you can add dependencies to other modules like:
+This will be accessible from any modules so you can add dependencies like:
 
 ```kotlin
 implementation(local.features.home)
@@ -115,13 +115,11 @@ This means that, instead of generating a file called `modules.kt` it will genera
 
 ## Custom root module name
 
-By default, the root module is named `local`. However, it's possible to define a custom name:
+By default, the root accessor property is named `local`. However, it's possible to define a custom name:
 
 ```kotlin
 autoModule {
-
     rootModuleName = "banana"
-
 }
 ```
 
@@ -138,7 +136,7 @@ implementation(banana.features.home)
 ```
 
 Note: Certain names (like "modules") are not allowed since we use `DependencyHandler`
-to scope the root module and it already has a `modules` property defined as a Java method 
+to scope the root module and it already has a `modules` property defined as a JVM method 
 with name `getModules()`. 
 
 This type of scoping is used to avoid leaking everywhere in the build script.
@@ -156,7 +154,7 @@ This allows you to have a smooth migration to Kotlin Scripts in the future but r
 changes in the mean time.
 
 If you want to keep using Gradle with Groovy scripts, instead of Kotlin, this plugin will still
-work. However, you still need to add support for kotlin in `buildSrc/build.gradle`.
+work. However, you still need to add support for kotlin scripts in `buildSrc/build.gradle`.
 
 ## History 
 
@@ -166,9 +164,9 @@ https://gist.github.com/pablisco/e50c792f1febb77af0fbc2d4f8f2810e
 
 And this tweet:
  
- https://twitter.com/pablisc0/status/1227933148622860289
+https://twitter.com/pablisc0/status/1227933148622860289
  
-Couple of weeks of sleepless evening, and auto-module was born.
+Couple of weeks of sleepless evenings, and auto-module was born.
 
 ## License 
 
