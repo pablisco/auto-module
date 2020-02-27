@@ -15,7 +15,6 @@ internal fun Path.runGradle(extras: GradleRunner.() -> GradleRunner = { this }):
     GradleRunner.create()
         .withProjectDir(this.toFile())
         .withPluginClasspath()
-        .withDebug(true)
         .forwardOutput()
         .run(extras)
         .build()

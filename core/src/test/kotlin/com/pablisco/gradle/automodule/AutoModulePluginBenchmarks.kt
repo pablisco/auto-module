@@ -20,9 +20,22 @@ class AutoModulePluginBenchmarks {
         @TempDir tmp: Path
     ) = measure {
         val manualProjectDir = tmp.resolve("manual").createDirectories()
+        val manualWithBuildSrcProjectDir = tmp.resolve("manualBuildSrc").createDirectories()
         val autoModuleProjectDir = tmp.resolve("autoModule").createDirectories()
 
         manualProjectDir.fileTree {
+            val modules = generateModules()
+            manualSettings(modules)
+            "build.gradle.kts" += """
+                plugins { kotlin("jvm") version "1.3.61" }
+                dependencies {
+                    ${dependencies(modules.asManualNotation())}
+                }
+            """.trimIndent()
+            createModules(modules)
+        }
+
+        manualWithBuildSrcProjectDir.fileTree {
             val modules = generateModules()
             manualSettings(modules)
             "build.gradle.kts" += """
@@ -48,12 +61,13 @@ class AutoModulePluginBenchmarks {
             createModules(modules)
         }
 
-        // warm up
-        autoModuleProjectDir.runGradle()
-        manualProjectDir.runGradle()
+        "Warm up - Manual build" { manualProjectDir.runGradle() }
+        "Warm up - Manual build with buildSrc" { manualWithBuildSrcProjectDir.runGradle() }
+        "Warm up - AutoModule build" { autoModuleProjectDir.runGradle() }
 
         "AutoModule build"(runCount = 10) { autoModuleProjectDir.runGradle() }
         "Manual build"(runCount = 10) { manualProjectDir.runGradle() }
+        "Manual build wih buildSrc"(runCount = 10) { manualWithBuildSrcProjectDir.runGradle() }
     }
 
 }

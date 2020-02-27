@@ -69,7 +69,7 @@ private fun TypeSpec.Builder.write(node: ModuleNode) = node.apply {
     }
 }
 
-fun Path.toGradleCoordinates(): String = ":" + toString().replace(File.separatorChar, ':')
+internal fun Path.toGradleCoordinates(): String = ":" + toString().replace(File.separatorChar, ':')
 
 private val dependencyHandlerProperty =
     ParameterSpec("dh", DependencyHandler::class.asClassName())

@@ -5,8 +5,6 @@ import com.pablisco.gradle.automodule.utils.createFile
 import org.gradle.api.Plugin
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.initialization.Settings
-import org.gradle.api.logging.Logger
-import org.gradle.api.logging.Logging
 
 class AutoModulePlugin : Plugin<Settings> {
 
@@ -20,17 +18,12 @@ class AutoModulePlugin : Plugin<Settings> {
             with(autoModuleScope) {
                 notifyIgnoredModules()
                 checkRootNameIsAvailable()
-                if (rootModule.hasNoChildren()) {
-                    log("No modules found in $rootDir")
-                } else {
-                    includeModulesToSettings()
-                    generateModuleGraph()
-                    addGroovySupport()
-                }
+                includeModulesToSettings()
+                generateModuleGraph()
+                addGroovySupport()
             }
         }
     }
-
 }
 
 private fun AutoModuleScope.checkRootNameIsAvailable() {
@@ -47,7 +40,7 @@ private fun AutoModuleScope.notifyIgnoredModules() {
 }
 
 private fun AutoModuleScope.addGroovySupport() {
-    gradle.beforeProject { project ->
+    settings.gradle.beforeProject { project ->
         project.extensions.add(
             autoModule.entryPointName,
             GroovyRootModule(project.dependencies)
@@ -70,24 +63,18 @@ private fun AutoModuleScope.generateModuleGraph() {
 }
 
 private fun AutoModuleScope.isCached(): Boolean =
-    cacheChecksum.let { "${rootModule.hashcode()}" == it }
+    cacheChecksum.let { "$scriptsHash" == it }
 
 private fun AutoModuleScope.saveCachedChecksum() {
-    checkSumLocation.createFile(content = "${rootModule.hashcode()}")
+    checkSumLocation.createFile(content = "$scriptsHash")
 }
 
 private fun AutoModuleScope.includeModulesToSettings() {
     rootModule.walk().mapNotNull { it.path }.forEach { path ->
         log("include($path)")
-        include(path)
+        settings.include(path)
     }
 }
-
-private fun AutoModuleScope.log(message: String) {
-    logger.log(autoModule.logLevel, "[Auto-Module] $message")
-}
-
-private val logger: Logger by lazy { Logging.getLogger(AutoModulePlugin::class.java) }
 
 /**
  * Default implementation of [ModuleNode.hashCode] doesn't take into account sequences.

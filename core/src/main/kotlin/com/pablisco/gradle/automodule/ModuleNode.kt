@@ -18,26 +18,33 @@ internal fun Path.rootModule(
 ) = ModuleNode(
     name = name,
     path = null,
-    children = findChildModules(ignored)
+    children = findChildModules(
+        ignored = ignored,
+        scriptPaths = findScripts()
+    )
 )
+
+internal fun Path.findScripts(isValidScript: Path.() -> Boolean = Path::isValidScript) =
+    walk().filter { it.isValidScript() }.toList()
 
 internal fun Path.findChildModules(
     ignored: List<String>,
-    rootPath: Path = this,
-    isValidScript: Path.() -> Boolean = Path::isValidScript
+    scriptPaths: List<Path>,
+    rootPath: Path = this
 ): Sequence<ModuleNode> = list()
     .filterNot { it.name == "buildSrc" }
     .filterNot { it.name.startsWith(".") }
     .filter { Files.isDirectory(it) }
-    .filter { child -> child.walk().any { it.isValidScript() } }
-    .map {
+    .filter { child -> scriptPaths.any { it.startsWith(child) } }
+    .map { it to rootPath.relativize(it).toGradleCoordinates() }
+    .filterNot { (_, coordinates) -> coordinates in ignored }
+    .map { (path, coordinates) ->
         ModuleNode(
-            name = it.name,
-            path = rootPath.relativize(it).toGradleCoordinates(),
-            children = it.findChildModules(ignored, rootPath)
+            name = path.name,
+            path = coordinates,
+            children = path.findChildModules(ignored, scriptPaths, rootPath)
         )
     }
-    .filterNot { it.path in ignored }
 
 internal fun ModuleNode.hasChildren(): Boolean =
     children.firstOrNull() != null
