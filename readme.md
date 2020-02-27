@@ -13,6 +13,7 @@ So, these are some (but not all) of the reasons why you should use this:
  - __Type safety:__ After you rename a module, any reference to it will complain when evaluating the project's build, so you know where you need to change your dependencies.
  - __IDE Auto-complete:__ One of the benefits of using `kts` build scripts is that the IDE can provide auto complete. This will save you multiple trips to the `settings.gradle[.kt]` script or the project structure to remember the name of the module you are looking for.
  - __Progressive upgrade:__ It has support for Groovy gradle so you don't have to migrate all your modules to use kts if you are not quite there yet or don't need it on all of them.
+ - __Module generation:__ You can define tasks that can be used from command line to generate a predefined module structure with the provided template. The IDE only allows to create modules in the root of the project, this allows to create it on any directory as well as provide the means for templating how certain modules are defined.
  
 ## How do I use it?
 
@@ -83,6 +84,46 @@ More details can be found on this example: [multi-kotlin-project-with-buildSrc](
 
 Extra tip: Since `modules.kt` is generated each time the build is evaluated, it's possible to
 add it to `.gitignore` to avoid unnecessary changes when committing :)
+
+## Module generation tasks
+
+You can define tasks that can be used from command line to generate new modules:
+
+```kotlin
+autoModule {
+    template(
+        path = Paths.get("features"), //optional, default is root
+        type = "feature"
+    ) { // FileTreeScope
+        "build.gradle.kts" += """
+        plugins { 
+            kotlin("jvm") version kotlin_version 
+        }
+        dependencies {
+            implementation(local.core)
+        }
+        """.trimIndent()
+        "src/main/kotlin" {}
+        "src/test/kotlin" {}
+    }   
+}
+```
+
+This generates a task called `createFeatureModule` that you can use from command line like this:
+
+```bash
+./gradlew createFeatureModule --name=settings
+```
+
+Calling that task will create a new module inside `$rootDir/features/settings/` with the defined files and directories.
+
+Since modules are included with each sync, AutoModule will also add this new module to the graph and you are ready to use it straight away.
+
+If you want to change the target directory where the module is to be created you can also add the `path` parameter in command line:
+
+```bash
+./gradlew createFeatureModule --name=settings
+```
 
 ## Ignore modules
 

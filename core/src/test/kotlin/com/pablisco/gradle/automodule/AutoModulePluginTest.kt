@@ -1,10 +1,8 @@
 package com.pablisco.gradle.automodule
 
 import com.pablisco.gradle.automodule.filetree.fileTree
-import com.pablisco.gradle.automodule.gradle.buildSrcModule
-import com.pablisco.gradle.automodule.gradle.defaultSettingsGradleScript
-import com.pablisco.gradle.automodule.gradle.runGradleProjects
-import com.pablisco.gradle.automodule.gradle.shouldBeSuccess
+import com.pablisco.gradle.automodule.gradle.*
+import com.pablisco.gradle.automodule.utils.exists
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldContain
 import org.amshove.kluent.shouldNotBeEqualTo
@@ -224,6 +222,48 @@ class AutoModulePluginTest {
         val secondRunLastModified = projectDir.modulesKt.lastModified
 
         initialRunLastModified shouldNotBeEqualTo secondRunLastModified
+    }
+
+    @Test
+    fun `generates task for a given template`(@TempDir projectDir: Path) {
+        projectDir.fileTree {
+            "settings.gradle.kts" += defaultSettingsGradleScript + """
+                autoModule {
+                    template("default") {
+                        "build.gradle.kts"()
+                    }
+                }
+            """.trimIndent()
+            "build.gradle.kts"()
+            buildSrcModule()
+        }
+
+        projectDir.runGradle {
+            withArguments("createDefaultModule", "--name=simpleModule")
+        }
+
+        check(projectDir.resolve("simpleModule/build.gradle.kts").exists())
+    }
+
+    @Test
+    fun `generates task for a given template with custom path`(@TempDir projectDir: Path) {
+        projectDir.fileTree {
+            "settings.gradle.kts" += defaultSettingsGradleScript + """
+                autoModule {
+                    template(type = "feature", path = "features") {
+                        "build.gradle.kts"()
+                    }
+                }
+            """.trimIndent()
+            "build.gradle.kts"()
+            buildSrcModule()
+        }
+
+        projectDir.runGradle {
+            withArguments("createFeatureModule", "--name=settings")
+        }
+
+        check(projectDir.resolve("features/settings/build.gradle.kts").exists())
     }
 
 }

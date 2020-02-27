@@ -3,6 +3,7 @@ package com.pablisco.gradle.automodule
 import com.pablisco.gradle.automodule.utils.checkPropertyIsNotPresentIn
 import com.pablisco.gradle.automodule.utils.createFile
 import org.gradle.api.Plugin
+import org.gradle.api.Project
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.initialization.Settings
 
@@ -23,8 +24,19 @@ class AutoModulePlugin : Plugin<Settings> {
                 addGroovySupport()
             }
         }
+
+        target.gradle.rootProject { rootProject ->
+            autoModuleScope.autoModule.templates.forEach { rootProject.createTask(it) }
+        }
     }
 }
+
+private fun Project.createTask(template: AutoModuleTemplate): CreateModuleTask =
+    tasks.create(
+        "create${template.name.capitalize()}Module",
+        CreateModuleTask::class.java,
+        template
+    )
 
 private fun AutoModuleScope.checkRootNameIsAvailable() {
     checkPropertyIsNotPresentIn<DependencyHandler>(autoModule.entryPointName) {
