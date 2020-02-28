@@ -58,5 +58,5 @@ open class AutoModule(
 internal data class AutoModuleTemplate(
     val name: String,
     val path: String?,
-    val files: FileTreeScope.() -> Unit
+    val files: ApplyTemplateScope.() -> Unit
 )

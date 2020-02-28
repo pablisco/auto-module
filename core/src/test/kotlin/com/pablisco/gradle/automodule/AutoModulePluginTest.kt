@@ -230,7 +230,7 @@ class AutoModulePluginTest {
             "settings.gradle.kts" += defaultSettingsGradleScript + """
                 autoModule {
                     template("default") {
-                        "build.gradle.kts"()
+                        emptyFile( "build.gradle.kts")
                     }
                 }
             """.trimIndent()
@@ -239,7 +239,7 @@ class AutoModulePluginTest {
         }
 
         projectDir.runGradle {
-            withArguments("createDefaultModule", "--name=simpleModule")
+            withArguments("createDefaultModule", "--templateDirectory=simpleModule")
         }
 
         check(projectDir.resolve("simpleModule/build.gradle.kts").exists())
@@ -251,7 +251,7 @@ class AutoModulePluginTest {
             "settings.gradle.kts" += defaultSettingsGradleScript + """
                 autoModule {
                     template(type = "feature", path = "features") {
-                        "build.gradle.kts"()
+                        emptyFile("build.gradle.kts")
                     }
                 }
             """.trimIndent()
@@ -260,7 +260,10 @@ class AutoModulePluginTest {
         }
 
         projectDir.runGradle {
-            withArguments("createFeatureModule", "--name=settings")
+            withArguments(
+                "createFeatureModule",
+                "--templateDirectory=settings"
+            )
         }
 
         check(projectDir.resolve("features/settings/build.gradle.kts").exists())

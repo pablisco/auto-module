@@ -94,17 +94,22 @@ autoModule {
     template(
         path = Paths.get("features"), //optional, default is root
         type = "feature"
-    ) { // FileTreeScope
-        "build.gradle.kts" += """
-        plugins { 
-            kotlin("jvm") version kotlin_version 
-        }
-        dependencies {
-            implementation(local.core)
-        }
-        """.trimIndent()
-        "src/main/kotlin" {}
-        "src/test/kotlin" {}
+    ) { // this: ApplyTemplateScope
+        file("build.gradle.kts", contents = """
+            plugins { 
+                kotlin("jvm") version kotlin_version 
+            }
+
+            name = "com.example.$templateDirectory"    
+
+            dependencies {
+                implementation(local.core)
+            }
+        """.trimIndent())
+        "src" { 
+            folder("main/kotlin")
+            folder("test/kotlin")
+        }   
     }   
 }
 ```
@@ -112,7 +117,7 @@ autoModule {
 This generates a task called `createFeatureModule` that you can use from command line like this:
 
 ```bash
-./gradlew createFeatureModule --name=settings
+./gradlew createFeatureModule --templateDirectory=settings
 ```
 
 Calling that task will create a new module inside `$rootDir/features/settings/` with the defined files and directories.
@@ -122,8 +127,16 @@ Since modules are included with each sync, AutoModule will also add this new mod
 If you want to change the target directory where the module is to be created you can also add the `path` parameter in command line:
 
 ```bash
-./gradlew createFeatureModule --name=settings --path=notFeature
+./gradlew createFeatureModule --templateDirectory=settings --workingDirectory=notFeature
 ```
+
+The "body" of the `template` function is a lambda that has a receiver of type `ApplyTemplateScope`. This scope exposes a `FileTreeScope` (*by* delegation) as well as `templateDirectory`, `workingDirectory` and `properties`.
+
+ - __Template Directory:__ The name of the folder where we are starting to write our template.
+ - __Working Directory:__ The place the module is going to be written. By default this one is the root directory for the current project.
+ - __Properties:__ These are the project's properties. These can be defined in the project's `gradle.properties` or the user one defined in `~/.gradle/gradle.properties`. Additionally you can include extra properties via command line like `-Pkey=value`.
+ 
+The first two can be accessed directly inside the lambda. Properties is a simple Map<String, String> so we can access the values normally: `properties["package"]`
 
 ## Ignore modules
 

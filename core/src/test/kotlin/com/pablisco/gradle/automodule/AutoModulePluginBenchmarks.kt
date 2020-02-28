@@ -84,7 +84,7 @@ private fun FileTreeScope.manualSettings(modules: Modules) {
 private fun FileTreeScope.createModules(modules: Modules) {
     modules.forEach { moduleName ->
         moduleName {
-            "build.gradle.kts"()
+            emptyFile("build.gradle.kts")
         }
     }
 }
