@@ -19,16 +19,9 @@ class AutoModulePluginTest {
     fun `generates modules code WITH single module`(@TempDir projectDir: Path) {
         projectDir.fileTree {
             "settings.gradle.kts" += defaultSettingsGradleScript
-            "build.gradle.kts" += """
-                plugins { kotlin("jvm") version "1.3.61" }
-                dependencies {
-                    implementation(local.singleModule)
-                }
-            """.trimIndent()
+            kotlinGradleScript()
             buildSrcModule()
-            "singleModule" {
-                "build.gradle.kts"()
-            }
+            emptyKotlinModule()
         }
 
         val result = projectDir.runGradleProjects()
@@ -40,20 +33,10 @@ class AutoModulePluginTest {
     fun `generates modules code WITH multiple modules`(@TempDir projectDir: Path) {
         projectDir.fileTree {
             "settings.gradle.kts" += defaultSettingsGradleScript
-            "build.gradle.kts" += """
-                plugins { kotlin("jvm") version "1.3.61" }
-                dependencies {
-                    implementation(local.moduleOne)
-                    implementation(local.moduleTwo)
-                }
-            """.trimIndent()
+            kotlinGradleScript("moduleOne", "moduleTwo")
             buildSrcModule()
-            "moduleOne" {
-                "build.gradle.kts"()
-            }
-            "moduleTwo" {
-                "build.gradle.kts"()
-            }
+            emptyKotlinModule("moduleOne")
+            emptyKotlinModule("moduleTwo")
         }
 
         val result = projectDir.runGradleProjects()
@@ -65,26 +48,13 @@ class AutoModulePluginTest {
     fun `generates modules code WITH nested modules`(@TempDir projectDir: Path) {
         projectDir.fileTree {
             "settings.gradle.kts" += defaultSettingsGradleScript
-            "build.gradle.kts" += """
-                plugins { kotlin("jvm") version "1.3.61" }
-                dependencies {
-                    implementation(local.moduleOne)  
-                    implementation(local.parent.moduleTwo)
-                    implementation(local.parent.moduleTwo.nested)
-                }
-            """.trimIndent()
+            kotlinGradleScript(
+                "moduleOne", "parent.moduleTwo", "parent.moduleTwo.nested"
+            )
             buildSrcModule()
-            "moduleOne" {
-                "build.gradle.kts"()
-            }
-            "parent" {
-                "moduleTwo" {
-                    "nested" {
-                        "build.gradle.kts"()
-                    }
-                    "build.gradle.kts"()
-                }
-            }
+            emptyKotlinModule("moduleOne")
+            emptyKotlinModule("parent/moduleTwo/nested")
+            emptyKotlinModule("parent/moduleTwo")
         }
 
         val result = projectDir.runGradleProjects()
@@ -100,17 +70,13 @@ class AutoModulePluginTest {
                     ignore(":configIgnored") 
                 }
             """.trimIndent()
-            "build.gradle.kts"()
+            emptyBuildGradleKts()
             buildSrcModule()
-            "configIgnored" {
-                "build.gradle.kts"()
-            }
+            emptyKotlinModule("configIgnored")
             "extensionIgnored" {
                 "build.gradle.kts.ignored"()
             }
-            "included" {
-                "build.gradle.kts"()
-            }
+            emptyKotlinModule("included")
         }
 
         val result = projectDir.runGradleProjects()
@@ -128,7 +94,7 @@ class AutoModulePluginTest {
                     ignore(":configIgnored")
                 }
             """.trimIndent()
-            "build.gradle.kts"()
+            emptyBuildGradleKts()
             buildSrcModule()
             "groovyModule" {
                 "build.gradle" += """
@@ -136,9 +102,8 @@ class AutoModulePluginTest {
                     dependencies { implementation(local.kotlinModule) }
                 """.trimIndent()
             }
-            "kotlinModule" {
-                "build.gradle.kts"()
-            }
+
+            emptyKotlinModule("kotlinModule")
         }
 
         val result = projectDir.runGradleProjects()
@@ -157,13 +122,11 @@ class AutoModulePluginTest {
             "build.gradle.kts" += """
                 plugins { kotlin("jvm") version "1.3.61" }
                 dependencies {
-                    implementation(banana.singleModule)
+                    implementation(banana.simpleModule)
                 }
             """.trimIndent()
             buildSrcModule()
-            "singleModule" {
-                "build.gradle.kts"()
-            }
+            emptyKotlinModule()
         }
 
         val result = projectDir.runGradleProjects()
@@ -175,16 +138,9 @@ class AutoModulePluginTest {
     fun `no code generation occurs with cache enabled`(@TempDir projectDir: Path) {
         projectDir.fileTree {
             "settings.gradle.kts" += defaultSettingsGradleScript
-            "build.gradle.kts" += """
-                plugins { kotlin("jvm") version "1.3.61" }
-                dependencies {
-                    implementation(local.singleModule)
-                }
-            """.trimIndent()
+            kotlinGradleScript()
             buildSrcModule()
-            "singleModule" {
-                "build.gradle.kts"()
-            }
+            emptyKotlinModule()
         }
 
         projectDir.runGradleProjects()
@@ -199,21 +155,15 @@ class AutoModulePluginTest {
     @Test
     fun `code generation occurs with cache is not enabled`(@TempDir projectDir: Path) {
         projectDir.fileTree {
-            "settings.gradle.kts" += defaultSettingsGradleScript + """
+            "settings.gradle.kts" += """
+                $defaultSettingsGradleScript
                 autoModule {
                     cacheEnabled = false
                 }
             """.trimIndent()
-            "build.gradle.kts" += """
-                plugins { kotlin("jvm") version "1.3.61" }
-                dependencies {
-                    implementation(local.singleModule)
-                }
-            """.trimIndent()
+            kotlinGradleScript()
             buildSrcModule()
-            "singleModule" {
-                "build.gradle.kts"()
-            }
+            emptyKotlinModule()
         }
 
         projectDir.runGradleProjects()
@@ -227,14 +177,15 @@ class AutoModulePluginTest {
     @Test
     fun `generates task for a given template`(@TempDir projectDir: Path) {
         projectDir.fileTree {
-            "settings.gradle.kts" += defaultSettingsGradleScript + """
+            "settings.gradle.kts" += """
+                $defaultSettingsGradleScript
                 autoModule {
                     template("default") {
                         emptyFile( "build.gradle.kts")
                     }
                 }
             """.trimIndent()
-            "build.gradle.kts"()
+            emptyBuildGradleKts()
             buildSrcModule()
         }
 
@@ -248,14 +199,15 @@ class AutoModulePluginTest {
     @Test
     fun `generates task for a given template with custom path`(@TempDir projectDir: Path) {
         projectDir.fileTree {
-            "settings.gradle.kts" += defaultSettingsGradleScript + """
+            "settings.gradle.kts" += """
+                $defaultSettingsGradleScript
                 autoModule {
                     template(type = "feature", path = "features") {
                         emptyFile("build.gradle.kts")
                     }
                 }
             """.trimIndent()
-            "build.gradle.kts"()
+            emptyBuildGradleKts()
             buildSrcModule()
         }
 
@@ -267,6 +219,23 @@ class AutoModulePluginTest {
         }
 
         check(projectDir.resolve("features/settings/build.gradle.kts").exists())
+    }
+
+
+    @Test
+    fun `files are generated after manual deletion with cache enabled`(
+        @TempDir projectDir: Path
+    ) {
+        projectDir.fileTree {
+            "settings.gradle.kts" += defaultSettingsGradleScript
+            kotlinGradleScript()
+            buildSrcModule()
+            emptyKotlinModule()
+        }
+
+        val result = projectDir.runGradleProjects()
+
+        result.shouldBeSuccess()
     }
 
 }
