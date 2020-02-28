@@ -122,7 +122,7 @@ Since modules are included with each sync, AutoModule will also add this new mod
 If you want to change the target directory where the module is to be created you can also add the `path` parameter in command line:
 
 ```bash
-./gradlew createFeatureModule --name=settings
+./gradlew createFeatureModule --name=settings --path=notFeature
 ```
 
 ## Ignore modules
