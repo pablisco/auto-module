@@ -104,6 +104,5 @@ private class DefaultFileTreeScope(private val path: Path) : FileTreeScope {
 /**
  * Entry point for [FileTreeScope]
  */
-internal fun Path.fileTree(block: FileTreeScope.() -> Unit) {
-    DefaultFileTreeScope(this).block()
-}
+internal fun Path.fileTree(block: FileTreeScope.() -> Unit = {}): FileTreeScope =
+    DefaultFileTreeScope(this).apply(block)

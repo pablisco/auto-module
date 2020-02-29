@@ -1,8 +1,11 @@
 package com.pablisco.gradle.automodule.utils
 
+import java.io.InputStream
+import java.math.BigInteger
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.attribute.FileAttribute
+import java.security.MessageDigest
 import kotlin.streams.asSequence
 
 internal fun Path.walk(): Sequence<Path> =
@@ -17,6 +20,13 @@ internal val Path.name: String
     get() = fileName.toString()
 
 internal fun Path.exists(): Boolean = Files.exists(this)
+
+internal fun Path.delete() {
+    Files.delete(this)
+}
+
+internal val Path.inputStream: InputStream
+    get() = Files.newInputStream(this)
 
 @Suppress("PlatformExtensionReceiverOfInline")
 internal fun Path.readText(): String? = Files.readAllLines(this).joinToString("\n")
@@ -33,3 +43,18 @@ internal fun Path.createFile(content: String) {
 internal fun Path.createDirectories(
     vararg fileAttributes: FileAttribute<*> = emptyArray()
 ): Path = Files.createDirectories(this, *fileAttributes)
+
+internal fun Path.maybeReadText(): String? =
+    takeIf { it.exists() }?.readText()
+
+internal fun Path.md5(): String = when {
+    exists() -> inputStream.use {
+        val md5 = MessageDigest.getInstance("MD5")
+        BigInteger(md5.digest(it.readBytes()))
+            .toString(16)
+
+    }
+    else -> ""
+}.padStart(32, '0')
+
+

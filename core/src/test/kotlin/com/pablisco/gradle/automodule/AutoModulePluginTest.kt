@@ -2,6 +2,7 @@ package com.pablisco.gradle.automodule
 
 import com.pablisco.gradle.automodule.filetree.fileTree
 import com.pablisco.gradle.automodule.gradle.*
+import com.pablisco.gradle.automodule.utils.delete
 import com.pablisco.gradle.automodule.utils.exists
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldContain
@@ -221,7 +222,6 @@ class AutoModulePluginTest {
         check(projectDir.resolve("features/settings/build.gradle.kts").exists())
     }
 
-
     @Test
     fun `files are generated after manual deletion with cache enabled`(
         @TempDir projectDir: Path
@@ -233,9 +233,31 @@ class AutoModulePluginTest {
             emptyKotlinModule()
         }
 
-        val result = projectDir.runGradleProjects()
+        projectDir.runGradleProjects()
+        projectDir.modulesKt.delete()
+        projectDir.runGradleProjects()
 
-        result.shouldBeSuccess()
+        check(projectDir.modulesKt.exists())
+    }
+
+    @Test
+    fun `files are generated after changing script with cache enabled`(
+        @TempDir projectDir: Path
+    ) {
+        projectDir.fileTree {
+            "settings.gradle.kts" += defaultSettingsGradleScript
+            kotlinGradleScript()
+            buildSrcModule()
+            emptyKotlinModule()
+        }
+
+        projectDir.runGradleProjects()
+
+        projectDir.fileTree().emptyKotlinModule("newModule")
+
+        val output = projectDir.runGradleProjects().output
+
+        output shouldContain "Project ':newModule'"
     }
 
 }

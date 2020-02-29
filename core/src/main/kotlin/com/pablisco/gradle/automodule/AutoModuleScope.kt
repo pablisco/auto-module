@@ -1,8 +1,6 @@
 package com.pablisco.gradle.automodule
 
 import com.pablisco.gradle.automodule.utils.camelCase
-import com.pablisco.gradle.automodule.utils.exists
-import com.pablisco.gradle.automodule.utils.readText
 import org.gradle.api.initialization.Settings
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
@@ -13,10 +11,8 @@ internal class AutoModuleScope(val settings: Settings) {
     private val buildSrc: Path = settings.rootDir.toPath().resolve("buildSrc")
     private val localBuild: Path = buildSrc.resolve("build/autoModule")
     internal val codeOutputDirectory: Path = buildSrc.resolve("src/main/kotlin/")
-    internal val checkSumLocation: Path = localBuild.resolve("checksum")
-
-    internal val cacheChecksum: String?
-        get() = checkSumLocation.takeIf { it.exists() }?.readText()
+    internal val directoriesHashFile: Path = localBuild.resolve("directories")
+    internal val generatedMd5File: Path = localBuild.resolve("generated")
 
     val autoModule: AutoModule =
         settings.extensions.create("autoModule", AutoModule::class.java)

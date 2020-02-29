@@ -2,6 +2,8 @@ package com.pablisco.gradle.automodule
 
 import com.pablisco.gradle.automodule.utils.checkPropertyIsNotPresentIn
 import com.pablisco.gradle.automodule.utils.createFile
+import com.pablisco.gradle.automodule.utils.maybeReadText
+import com.pablisco.gradle.automodule.utils.md5
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.dsl.DependencyHandler
@@ -61,7 +63,7 @@ private fun AutoModuleScope.addGroovySupport() {
 }
 
 private fun AutoModuleScope.generateModuleGraph() {
-    if (autoModule.cacheEnabled and isCached()) {
+    if (autoModule.cacheEnabled and isCached() and isCodeUpToDate()) {
         log("Module Graph is UP-TO-DATE")
     } else {
         rootModule.writeTo(
@@ -69,16 +71,23 @@ private fun AutoModuleScope.generateModuleGraph() {
             fileName = autoModule.modulesFileName,
             rootModuleName = autoModule.entryPointName
         )
-        saveCachedChecksum()
+        saveChecksums()
         log("Module Graph saved to $codeOutputDirectory/${autoModule.modulesFileName}.kt")
     }
 }
 
 private fun AutoModuleScope.isCached(): Boolean =
-    cacheChecksum.let { "$scriptsHash" == it }
+    "$scriptsHash" == directoriesHashFile.maybeReadText()
 
-private fun AutoModuleScope.saveCachedChecksum() {
-    checkSumLocation.createFile(content = "$scriptsHash")
+private fun AutoModuleScope.isCodeUpToDate(): Boolean =
+    generatedCodeMd5 == generatedMd5File.maybeReadText()
+
+private val AutoModuleScope.generatedCodeMd5: String
+    get() = codeOutputDirectory.resolve(autoModule.modulesFileName + ".kt").md5()
+
+private fun AutoModuleScope.saveChecksums() {
+    directoriesHashFile.createFile(content = "$scriptsHash")
+    generatedMd5File.createFile(content = generatedCodeMd5)
 }
 
 private fun AutoModuleScope.includeModulesToSettings() {

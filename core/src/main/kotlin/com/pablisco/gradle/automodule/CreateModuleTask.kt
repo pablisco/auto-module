@@ -68,5 +68,17 @@ class ApplyTemplateScope(
     val properties: Map<String, String>
 ) : FileTreeScope by fileTreeScope
 
+@Suppress("unused") // API
+fun ApplyTemplateScope.require(name: String): String =
+    optional(name) ?: error(
+        """
+        Expected a value for '$name'. 
+        You need to add a command line option like:  -P$name={value}
+        """.trimIndent()
+    )
+
+fun ApplyTemplateScope.optional(name: String): String? =
+    properties[name]
+
 private fun String?.asPath(default: () -> Path): Path =
     this?.let { Paths.get(it) } ?: default()

@@ -17,7 +17,7 @@ So, these are some (but not all) of the reasons why you should use this:
  
 ## How do I use it?
 
-Remove all your `include()` instructions inside `settings.gradle.[kts]` and add this:
+Remove all your `include()` instructions inside `settings.gradle[.kts]` and add this:
 
 ```kotlin
 plugins {
@@ -173,7 +173,7 @@ By default, the root accessor property is named `local`. However, it's possible 
 
 ```kotlin
 autoModule {
-    rootModuleName = "banana"
+    entryPointName = "banana"
 }
 ```
 
