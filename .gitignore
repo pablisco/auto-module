@@ -5,7 +5,6 @@
 .idea/**/dictionaries
 .idea/**/shelf
 .idea/**/runConfigurations.xml
-
 # Generated files
 .idea/**/contentModel.xml
 
@@ -35,3 +34,4 @@
 # Mac OS
 .DS_Store
 /buildSrc/src/main/kotlin/modules.kt
+/projectFilesBackup/.idea/workspace.xml
