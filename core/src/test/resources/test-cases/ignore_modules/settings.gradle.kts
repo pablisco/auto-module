@@ -1,0 +1,7 @@
+plugins {
+    id("com.pablisco.gradle.automodule")
+}
+
+autoModule {
+    ignore(":settingsKtIgnored")
+}

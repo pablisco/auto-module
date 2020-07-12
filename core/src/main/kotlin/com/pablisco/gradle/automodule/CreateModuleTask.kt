@@ -2,7 +2,7 @@ package com.pablisco.gradle.automodule
 
 import com.pablisco.gradle.automodule.filetree.FileTreeScope
 import com.pablisco.gradle.automodule.filetree.fileTree
-import org.gradle.api.internal.AbstractTask
+import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
 import java.nio.file.Path
@@ -11,7 +11,7 @@ import javax.inject.Inject
 
 internal open class CreateModuleTask @Inject constructor(
     private val template: AutoModuleTemplate
-) : AbstractTask() {
+) : DefaultTask() {
 
     private val projectPath = project.rootDir.toPath()
     private val defaultPath: Path = template.path.asPath { Paths.get("") }
@@ -34,7 +34,7 @@ internal open class CreateModuleTask @Inject constructor(
         val templateDirectory = checkNotNull(templateDirectory) {
             """
             Must provide the name of the module as a command line parameter:
-                ./gradlew $name --name={moduleName}
+                ./gradlew $name --templateDirectory={moduleName}
             """.trimIndent()
         }
 

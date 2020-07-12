@@ -1,11 +1,10 @@
 buildscript {
     repositories {
+        maven(url = uri("$rootDir/repo"))
         google()
         jcenter()
-    }
-    dependencies {
-        classpath(build.android)
-        classpath(build.kotlin)
+        mavenCentral()
+        gradlePluginPortal()
     }
 }
 
@@ -17,7 +16,7 @@ allprojects {
     }
 
     group = "com.pablisco.gradle.automodule"
-    version = "0.11"
+    version = "0.12"
 }
 
 tasks {

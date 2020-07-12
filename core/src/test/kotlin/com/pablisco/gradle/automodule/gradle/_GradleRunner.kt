@@ -12,12 +12,15 @@ internal fun Path.runGradleProjects(): BuildResult =
     }
 
 internal fun Path.runGradle(extras: GradleRunner.() -> GradleRunner = { this }): BuildResult =
-    GradleRunner.create()
-        .withProjectDir(this.toFile())
-        .withPluginClasspath()
-        .forwardOutput()
-        .run(extras)
-        .build()
+    kotlin.runCatching {
+        GradleRunner.create()
+            .withProjectDir(toFile())
+            .withPluginClasspath()
+            .forwardOutput()
+            .withDebug(true)
+            .run(extras)
+            .build()
+    }.getOrThrow()
 
 internal fun BuildResult.shouldBeSuccess() =
     task(":projects")?.outcome shouldBeEqualTo TaskOutcome.SUCCESS

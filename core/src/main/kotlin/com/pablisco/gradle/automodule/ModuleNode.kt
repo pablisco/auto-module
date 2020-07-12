@@ -1,9 +1,10 @@
 package com.pablisco.gradle.automodule
 
+import com.pablisco.gradle.automodule.utils.isDirectory
 import com.pablisco.gradle.automodule.utils.list
 import com.pablisco.gradle.automodule.utils.name
+import com.pablisco.gradle.automodule.utils.toGradlePath
 import com.pablisco.gradle.automodule.utils.walk
-import java.nio.file.Files
 import java.nio.file.Path
 
 internal data class ModuleNode(
@@ -34,9 +35,9 @@ internal fun Path.findChildModules(
 ): Sequence<ModuleNode> = list()
     .filterNot { it.name == "buildSrc" }
     .filterNot { it.name.startsWith(".") }
-    .filter { Files.isDirectory(it) }
+    .filter { it.isDirectory() }
     .filter { child -> scriptPaths.any { it.startsWith(child) } }
-    .map { it to rootPath.relativize(it).toGradleCoordinates() }
+    .map { it to rootPath.relativize(it).toGradlePath() }
     .filterNot { (_, coordinates) -> coordinates in ignored }
     .map { (path, coordinates) ->
         ModuleNode(
@@ -46,20 +47,14 @@ internal fun Path.findChildModules(
         )
     }
 
-internal fun ModuleNode.hasChildren(): Boolean =
-    children.firstOrNull() != null
-
-internal fun ModuleNode.hasNoChildren(): Boolean =
-    children.firstOrNull() == null
-
 internal fun ModuleNode.walk(): Sequence<ModuleNode> =
     children + children.flatMap { sequenceOf(this) + it.walk() }
 
-private fun Path.isValidScript() =
+private fun Path.isValidScript(): Boolean =
     isGroovyBuildScript() or isKotlinBuildScript()
 
-private fun Path.isGroovyBuildScript() =
+private fun Path.isGroovyBuildScript(): Boolean =
     toString().endsWith("build.gradle")
 
-private fun Path.isKotlinBuildScript() =
+private fun Path.isKotlinBuildScript(): Boolean =
     toString().endsWith("build.gradle.kts")

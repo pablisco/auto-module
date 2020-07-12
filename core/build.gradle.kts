@@ -1,8 +1,7 @@
-import com.android.build.gradle.internal.tasks.factory.dependsOn
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
-    kotlin("jvm")
+    kotlin("jvm") version kotlinVersion
+    idea
+    `kotlin-dsl`
     `java-gradle-plugin`
     `maven-publish`
     id("com.palantir.idea-test-fix") version "0.1.0"
@@ -11,6 +10,7 @@ plugins {
 
 dependencies {
     implementation(libs.kotlinJdk8)
+    implementation(libs.kotlinIo)
     implementation(libs.kotlinPoet)
 
     testImplementation(tests.junit5Jupiter)
@@ -24,47 +24,65 @@ tasks {
     test {
         useJUnitPlatform()
     }
-    withType<KotlinCompile>().configureEach {
+    compileKotlin {
         kotlinOptions.jvmTarget = "1.8"
     }
-    processTestResources.dependsOn(register<Copy>("copyTestResources") {
+
+    val copyTestResources by registering(Copy::class) {
         from("${projectDir}/src/test/resources")
         into("${buildDir}/classes/kotlin/test")
-    })
+    }
+
+    processTestResources.configure {
+        dependsOn(copyTestResources)
+    }
+
+    val jar by getting
+    val publish by getting
+    jar.finalizedBy(publish)
+
 }
 
 val sourcesJar = tasks.register<Jar>("sourcesJar") {
     archiveClassifier.set("sources")
-    from(sourceSets.main { allSource })
+    from(sourceSets.main.map { it.allSource })
 }
 
 publishing {
-    val localRepoPath = "${rootProject.rootDir}/repo"
-    repositories {
-        maven(url = uri(localRepoPath))
-    }
     publications {
-        create<MavenPublication>("maven") {
-            logger.info("saving to $localRepoPath")
+        create<MavenPublication>("Plugin") {
             from(components["java"])
             artifact(sourcesJar.get())
+            groupId = "${project.group}"
+            artifactId = project.name
+            version = "${project.version}"
         }
+    }
+    repositories {
+        maven(url = uri("$rootDir/repo"))
     }
 }
 
 pluginBundle {
     website = "https://github.com/pablisco/auto-module/"
     vcsUrl = "https://github.com/pablisco/auto-module/"
-    tags = listOf("auto", "module")
+    tags = listOf("automodule")
 }
 
 gradlePlugin {
     plugins {
-        create("auto-module") {
+        create("auto-module-plugin") {
             id = "com.pablisco.gradle.automodule"
             displayName = "Auto Module"
             description = "A Gradle plugin to generate the module graph and include the modules"
             implementationClass = "com.pablisco.gradle.automodule.AutoModulePlugin"
         }
+    }
+}
+
+idea {
+    module {
+        // hides test kts files so they are not parsed by the IDE
+        excludeDirs = setOf(file("src/test/resources/test-cases"))
     }
 }

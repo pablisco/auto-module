@@ -2,10 +2,10 @@ package com.pablisco.gradle.automodule
 
 import com.pablisco.gradle.automodule.filetree.FileTreeScope
 import com.pablisco.gradle.automodule.filetree.fileTree
-import com.pablisco.gradle.automodule.gradle.buildSrcModule
 import com.pablisco.gradle.automodule.gradle.defaultSettingsGradleScript
 import com.pablisco.gradle.automodule.gradle.runGradle
 import com.pablisco.gradle.automodule.utils.createDirectories
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path
@@ -13,6 +13,7 @@ import kotlin.system.measureTimeMillis
 
 private typealias Modules = Sequence<String>
 
+@Disabled("Not fully working")
 class AutoModulePluginBenchmarks {
 
     @Test
@@ -20,31 +21,17 @@ class AutoModulePluginBenchmarks {
         @TempDir tmp: Path
     ) = measure {
         val manualProjectDir = tmp.resolve("manual").createDirectories()
-        val manualWithBuildSrcProjectDir = tmp.resolve("manualBuildSrc").createDirectories()
         val autoModuleProjectDir = tmp.resolve("autoModule").createDirectories()
 
         manualProjectDir.fileTree {
             val modules = generateModules()
             manualSettings(modules)
             "build.gradle.kts" += """
-                plugins { kotlin("jvm") version "1.3.61" }
+                plugins { kotlin("jvm") version "1.3.72" }
                 dependencies {
                     ${dependencies(modules.asManualNotation())}
                 }
             """.trimIndent()
-            createModules(modules)
-        }
-
-        manualWithBuildSrcProjectDir.fileTree {
-            val modules = generateModules()
-            manualSettings(modules)
-            "build.gradle.kts" += """
-                plugins { kotlin("jvm") version "1.3.61" }
-                dependencies {
-                    ${dependencies(modules.asManualNotation())}
-                }
-            """.trimIndent()
-            buildSrcModule()
             createModules(modules)
         }
 
@@ -52,22 +39,37 @@ class AutoModulePluginBenchmarks {
             val modules = generateModules()
             "settings.gradle.kts" += defaultSettingsGradleScript
             "build.gradle.kts" += """
-                plugins { kotlin("jvm") version "1.3.61" }
+                buildscript {
+                    repositories {
+                        jcenter()
+                        mavenLocal()
+                    }
+                    dependencies {
+                        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.72")
+                    }
+                }
+                
+                allprojects {
+                    repositories {
+                        mavenCentral()
+                        jcenter()
+                    }
+                }
+            """.trimIndent()
+            "consumer/build.gradle.kts" += """
+                plugins { kotlin("jvm") }
                 dependencies {
                     ${dependencies(modules.asAutoModuleNotation())}
                 }
             """.trimIndent()
-            buildSrcModule()
             createModules(modules)
         }
 
         "Warm up - Manual build" { manualProjectDir.runGradle() }
-        "Warm up - Manual build with buildSrc" { manualWithBuildSrcProjectDir.runGradle() }
         "Warm up - AutoModule build" { autoModuleProjectDir.runGradle() }
 
         "AutoModule build"(runCount = 10) { autoModuleProjectDir.runGradle() }
         "Manual build"(runCount = 10) { manualProjectDir.runGradle() }
-        "Manual build wih buildSrc"(runCount = 10) { manualWithBuildSrcProjectDir.runGradle() }
     }
 
 }
@@ -90,13 +92,13 @@ private fun FileTreeScope.createModules(modules: Modules) {
 }
 
 private fun dependencies(modules: Sequence<String>): String =
-    modules.joinToString("\n") { """implementation($it)""" }
+    modules.joinToString("\n") { """implementation(project($it))""" }
 
 private fun Modules.asManualNotation(): Sequence<String> =
     map { "\":$it\"" }
 
 private fun Modules.asAutoModuleNotation(): Sequence<String> =
-    map { "local.$it" }
+    map { "autoModules.$it" }
 
 private fun measure(block: MeasureScope.() -> Unit) {
     println(MeasureScope().apply(block).log)

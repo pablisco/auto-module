@@ -21,11 +21,11 @@ Remove all your `include()` instructions inside `settings.gradle[.kts]` and add 
 
 ```kotlin
 plugins {
-    id("com.pablisco.gradle.automodule") version "[latest.version]"
+    id("com.pablisco.gradle.automodule") version "0.12"
 }
 ```
 
-And that's it!
+That's it!
 
 At least from the settings script sense. Now you will probably want to convert all the local project
 dependencies to use the type safe graph!
@@ -40,50 +40,56 @@ root
     \-- settings
 ```
 
-This plugin will create a `.kt` file inside `buildSrc` with the following code:
+AutoModule generates a build module in `.gradle/automodule` with code similar to this:
 
 ```kotlin
-val DependencyHandler.local: Local
-    get() = Local(this)
-
-class Local(
-    dh: DependencyHandler
-) {
-    val app = dh.project(":app")
-    val features = Features(dh)
-    
-    class Features(
-        dh: dependencyHandler,
-        dependency: Dependency = dh.project(":features")
-    ) : Dependency by dependency  {
-        val home = dh.project(":features:home")
-        val settings = dh.project(":features:settings")
+object autoModules {
+    val app = App
+    object App : AutoModuleDependency by autoModuleDependency(":app")
+    val features = Features
+    object Features : AutoModuleDependency by autoModuleDependency(":features") {
+        val home = Home
+        object Home : AutoModuleDependency by autoModuleDependency(":features:home")
+        object settings : AutoModuleDependency by autoModuleDependency(":features:settings")
     }
 }
 ```
 
-This will be accessible from any modules so you can add dependencies like:
+This will be accessible from any module, so you can add dependencies like:
 
 ```kotlin
-implementation(local.features.home)
+implementation(project(autoModules.features.home)
 ```
 
-Note: The `buildSrc` is not generated, so for this plugin to work you will need to create
-`buildSrc/build.gradle.kts` with the gradle dsl plugin enabled, like this:
+## Ignore modules
+
+If you want to make sure a module *is not* included to the Gradle graph you can do it in two ways:
+
+1. Adding the `.ignore` extension at the end of the `build.gradle[.kts]` script.
+2. Inside `settings.gradle[.kts]` you can configure `autoModule` to do so:
 
 ```kotlin
-repositories {
-    jcenter()
-}
-
-plugins {
-    `kotlin-dsl`
+autoModule {
+  ignore(":modulePath", ":some:other:module")
 }
 ```
-More details can be found on this example: [multi-kotlin-project-with-buildSrc](https://github.com/gradle/kotlin-dsl-samples/tree/master/samples/multi-kotlin-project-with-buildSrc)
 
-Extra tip: Since `modules.kt` is generated each time the build is evaluated, it's possible to
-add it to `.gitignore` to avoid unnecessary changes when committing :)
+## Legacy Groovy Script support
+
+When you have a large project, it may not be possible to migrate all your scripts to Kotlin.
+However, you can use the same semantics as you have in Kotlin with Groovy scripts:
+
+```groovy
+implementation(autModules.features.home)
+```
+
+This allows you to have a smooth migration to Kotlin Scripts in the future but remain with minimum 
+changes in the meantime.
+
+If you want to keep using Gradle with Groovy scripts, instead of Kotlin, this plugin will still
+work. However, you still need to add support for kotlin scripts in `buildSrc/build.gradle`.
+
+
 
 ## Module generation tasks
 
@@ -137,78 +143,6 @@ The "body" of the `template` function is a lambda that has a receiver of type `A
  - __Properties:__ These are the project's properties. These can be defined in the project's `gradle.properties` or the user one defined in `~/.gradle/gradle.properties`. Additionally you can include extra properties via command line like `-Pkey=value`.
  
 The first two can be accessed directly inside the lambda. Properties is a simple Map<String, String> so we can access the values normally: `properties["package"]`
-
-## Ignore modules
-
-If you want to make sure a module *is not* included to the Gradle graph you can do it in two ways:
-
-1. Adding the `.ignore` extension at the end of the `build.gradle[.kts]` script.
-2. Inside `settings.gradle[.kts]` you can configure `autoModule` to do so:
-
-```kotlin
-autoModule {
-  ignore(":modulePath", ":some:other:module")
-}
-```
-
-## Generated files
-
-By default, the generated code creates a file named `modules.kt` inside `buildSrc` with all the 
-necessary details to add modules as dependencies.
-
-If you want to change the name of this file you can do it inside `settings.gradle[.kts]`:
-
-```kotlin
-autoModule {
-  modulesFileName = "AutoModules"
-}
-```
-
-This means that, instead of generating a file called `modules.kt` it will generate one called 
-`AutoModules.kt`.
-
-## Custom root module name
-
-By default, the root accessor property is named `local`. However, it's possible to define a custom name:
-
-```kotlin
-autoModule {
-    entryPointName = "banana"
-}
-```
-
-This means that instead of using:
-
-```kotlin
-implementation(local.features.home)
-```
-
-you'll be able to use:
-
-```kotlin
-implementation(banana.features.home)
-```
-
-Note: Certain names (like "modules") are not allowed since we use `DependencyHandler`
-to scope the root module and it already has a `modules` property defined as a JVM method 
-with name `getModules()`. 
-
-This type of scoping is used to avoid leaking everywhere in the build script.
-
-## Legacy Groovy Script support
-
-When you have a large project, it may not be possible to migrate all your scripts to Kotlin.
-However, you can use the same semantics as you have in Kotlin with Groovy scripts:
-
-```groovy
-implementation(local.features.home)
-```
-
-This allows you to have a smooth migration to Kotlin Scripts in the future but remain with minimum 
-changes in the mean time.
-
-If you want to keep using Gradle with Groovy scripts, instead of Kotlin, this plugin will still
-work. However, you still need to add support for kotlin scripts in `buildSrc/build.gradle`.
 
 ## History 
 

@@ -21,8 +21,14 @@ internal val Path.name: String
 
 internal fun Path.exists(): Boolean = Files.exists(this)
 
-internal fun Path.delete() {
-    Files.delete(this)
+internal fun Path.delete() = Files.delete(this)
+
+internal fun Path.isDirectory(): Boolean = Files.isDirectory(this)
+
+internal fun Path.deleteRecursively() {
+    if (exists()) {
+        walk().sortedDescending().forEach(Path::delete)
+    }
 }
 
 internal val Path.inputStream: InputStream
@@ -56,5 +62,8 @@ internal fun Path.md5(): String = when {
     }
     else -> ""
 }.padStart(32, '0')
+
+internal fun Path.toGradlePath(): String = joinToString(separator = ":", prefix = ":") { it.name }
+
 
 

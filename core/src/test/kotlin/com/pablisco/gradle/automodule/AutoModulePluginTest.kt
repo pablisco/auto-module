@@ -1,269 +1,132 @@
 package com.pablisco.gradle.automodule
 
 import com.pablisco.gradle.automodule.filetree.fileTree
-import com.pablisco.gradle.automodule.gradle.*
+import com.pablisco.gradle.automodule.gradle.kotlinModule
+import com.pablisco.gradle.automodule.gradle.runGradle
+import com.pablisco.gradle.automodule.gradle.runGradleProjects
+import com.pablisco.gradle.automodule.gradle.shouldBeSuccess
+import com.pablisco.gradle.automodule.utils.createDirectories
 import com.pablisco.gradle.automodule.utils.delete
+import com.pablisco.gradle.automodule.utils.deleteRecursively
 import com.pablisco.gradle.automodule.utils.exists
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldContain
-import org.amshove.kluent.shouldNotBeEqualTo
 import org.amshove.kluent.shouldNotContain
+import org.jetbrains.kotlin.konan.file.recursiveCopyTo
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
 import java.nio.file.attribute.FileTime
 
 class AutoModulePluginTest {
 
     @Test
-    fun `generates modules code WITH single module`(@TempDir projectDir: Path) {
-        projectDir.fileTree {
-            "settings.gradle.kts" += defaultSettingsGradleScript
-            kotlinGradleScript()
-            buildSrcModule()
-            emptyKotlinModule()
-        }
-
-        val result = projectDir.runGradleProjects()
-
+    fun `generates modules code WITH simple module`() = testCase("simple_module") {
+        val result = workingDir.runGradleProjects()
         result.shouldBeSuccess()
     }
 
     @Test
-    fun `generates modules code WITH multiple modules`(@TempDir projectDir: Path) {
-        projectDir.fileTree {
-            "settings.gradle.kts" += defaultSettingsGradleScript
-            kotlinGradleScript("moduleOne", "moduleTwo")
-            buildSrcModule()
-            emptyKotlinModule("moduleOne")
-            emptyKotlinModule("moduleTwo")
-        }
-
-        val result = projectDir.runGradleProjects()
-
+    fun `generates modules code WITH multiple modules`() = testCase("multiple_modules") {
+        val result = workingDir.runGradleProjects()
         result.shouldBeSuccess()
     }
 
     @Test
-    fun `generates modules code WITH nested modules`(@TempDir projectDir: Path) {
-        projectDir.fileTree {
-            "settings.gradle.kts" += defaultSettingsGradleScript
-            kotlinGradleScript(
-                "moduleOne", "parent.moduleTwo", "parent.moduleTwo.nested"
-            )
-            buildSrcModule()
-            emptyKotlinModule("moduleOne")
-            emptyKotlinModule("parent/moduleTwo/nested")
-            emptyKotlinModule("parent/moduleTwo")
-        }
-
-        val result = projectDir.runGradleProjects()
-
+    fun `generates modules code WITH nested modules`() = testCase("nested_modules") {
+        val result = workingDir.runGradleProjects()
         result.shouldBeSuccess()
     }
 
     @Test
-    fun `ignores modules`(@TempDir projectDir: Path) {
-        projectDir.fileTree {
-            "settings.gradle.kts" += defaultSettingsGradleScript + """
-                autoModule { 
-                    ignore(":configIgnored") 
-                }
-            """.trimIndent()
-            emptyBuildGradleKts()
-            buildSrcModule()
-            emptyKotlinModule("configIgnored")
-            "extensionIgnored" {
-                "build.gradle.kts.ignored"()
-            }
-            emptyKotlinModule("included")
-        }
+    fun `ignores modules`() = testCase("ignore_modules") {
+        val result = workingDir.runGradleProjects()
 
-        val result = projectDir.runGradleProjects()
-
-        result.output shouldNotContain "Project ':configIgnored'"
+        result.output shouldNotContain "Project ':settingsKtIgnored'"
         result.output shouldNotContain "Project ':extensionIgnored'"
         result.output shouldContain "Project ':included'"
     }
 
     @Test
-    fun `can use from groovy gradle script`(@TempDir projectDir: Path) {
-        projectDir.fileTree {
-            "settings.gradle.kts" += defaultSettingsGradleScript + """
-                autoModule { 
-                    ignore(":configIgnored")
-                }
-            """.trimIndent()
-            emptyBuildGradleKts()
-            buildSrcModule()
-            "groovyModule" {
-                "build.gradle" += """
-                    apply plugin: 'java'
-                    dependencies { implementation(local.kotlinModule) }
-                """.trimIndent()
-            }
-
-            emptyKotlinModule("kotlinModule")
-        }
-
-        val result = projectDir.runGradleProjects()
+    fun `can use from groovy gradle script`() = testCase("groovy_support") {
+        val result = workingDir.runGradleProjects()
 
         result.shouldBeSuccess()
     }
 
     @Test
-    fun `can change root module name`(@TempDir projectDir: Path) {
-        projectDir.fileTree {
-            "settings.gradle.kts" += defaultSettingsGradleScript + """
-                autoModule {
-                    entryPointName = "banana"
-                }
-            """.trimIndent()
-            "build.gradle.kts" += """
-                plugins { kotlin("jvm") version "1.3.61" }
-                dependencies {
-                    implementation(banana.simpleModule)
-                }
-            """.trimIndent()
-            buildSrcModule()
-            emptyKotlinModule()
-        }
-
-        val result = projectDir.runGradleProjects()
-
-        result.shouldBeSuccess()
-    }
-
-    @Test
-    fun `no code generation occurs with cache enabled`(@TempDir projectDir: Path) {
-        projectDir.fileTree {
-            "settings.gradle.kts" += defaultSettingsGradleScript
-            kotlinGradleScript()
-            buildSrcModule()
-            emptyKotlinModule()
-        }
-
-        projectDir.runGradleProjects()
-        val initialRunLastModified = projectDir.modulesKt.lastModified
-        projectDir.runGradleProjects()
-        val cachedRunLastModified = projectDir.modulesKt.lastModified
+    fun `no code generation occurs with cache enabled`() = testCase(
+        path = "simple_module",
+        workingPath = "no_code_gen_with_cache"
+    ) {
+        workingDir.runGradleProjects()
+        val initialRunLastModified = workingDir.modulesKt.lastModified
+        workingDir.runGradleProjects()
+        val cachedRunLastModified = workingDir.modulesKt.lastModified
 
         initialRunLastModified shouldBeEqualTo cachedRunLastModified
     }
 
-    @Suppress("EXPERIMENTAL_API_USAGE")
     @Test
-    fun `code generation occurs with cache is not enabled`(@TempDir projectDir: Path) {
-        projectDir.fileTree {
-            "settings.gradle.kts" += """
-                $defaultSettingsGradleScript
-                autoModule {
-                    cacheEnabled = false
-                }
-            """.trimIndent()
-            kotlinGradleScript()
-            buildSrcModule()
-            emptyKotlinModule()
-        }
-
-        projectDir.runGradleProjects()
-        val initialRunLastModified = projectDir.modulesKt.lastModified
-        projectDir.runGradleProjects()
-        val secondRunLastModified = projectDir.modulesKt.lastModified
-
-        initialRunLastModified shouldNotBeEqualTo secondRunLastModified
-    }
-
-    @Test
-    fun `generates task for a given template`(@TempDir projectDir: Path) {
-        projectDir.fileTree {
-            "settings.gradle.kts" += """
-                $defaultSettingsGradleScript
-                autoModule {
-                    template("default") {
-                        emptyFile( "build.gradle.kts")
-                    }
-                }
-            """.trimIndent()
-            emptyBuildGradleKts()
-            buildSrcModule()
-        }
-
-        projectDir.runGradle {
+    fun `generates task for a given template`() = testCase("template_task") {
+        workingDir.runGradle {
             withArguments("createDefaultModule", "--templateDirectory=simpleModule")
         }
 
-        check(projectDir.resolve("simpleModule/build.gradle.kts").exists())
+        check(workingDir.resolve("simpleModule/build.gradle.kts").exists())
     }
 
     @Test
-    fun `generates task for a given template with custom path`(@TempDir projectDir: Path) {
-        projectDir.fileTree {
-            "settings.gradle.kts" += """
-                $defaultSettingsGradleScript
-                autoModule {
-                    template(type = "feature", path = "features") {
-                        emptyFile("build.gradle.kts")
-                    }
-                }
-            """.trimIndent()
-            emptyBuildGradleKts()
-            buildSrcModule()
-        }
-
-        projectDir.runGradle {
-            withArguments(
-                "createFeatureModule",
-                "--templateDirectory=settings"
-            )
-        }
-
-        check(projectDir.resolve("features/settings/build.gradle.kts").exists())
-    }
-
-    @Test
-    fun `files are generated after manual deletion with cache enabled`(
-        @TempDir projectDir: Path
+    fun `files are generated after manual deletion with cache enabled`() = testCase(
+        path = "simple_module",
+        workingPath = "files_are_generated_after_manual_delete"
     ) {
-        projectDir.fileTree {
-            "settings.gradle.kts" += defaultSettingsGradleScript
-            kotlinGradleScript()
-            buildSrcModule()
-            emptyKotlinModule()
-        }
+        workingDir.runGradleProjects()
+        workingDir.modulesKt.delete()
+        workingDir.runGradleProjects()
 
-        projectDir.runGradleProjects()
-        projectDir.modulesKt.delete()
-        projectDir.runGradleProjects()
-
-        check(projectDir.modulesKt.exists())
+        check(workingDir.modulesKt.exists())
     }
 
     @Test
-    fun `files are generated after changing script with cache enabled`(
-        @TempDir projectDir: Path
+    fun `files are generated after changing script with cache enabled`() = testCase(
+        path = "simple_module",
+        workingPath = "files_are_generated_after_script_changes"
     ) {
-        projectDir.fileTree {
-            "settings.gradle.kts" += defaultSettingsGradleScript
-            kotlinGradleScript()
-            buildSrcModule()
-            emptyKotlinModule()
-        }
+        workingDir.runGradleProjects()
 
-        projectDir.runGradleProjects()
+        workingDir.fileTree().kotlinModule("newModule")
 
-        projectDir.fileTree().emptyKotlinModule("newModule")
-
-        val output = projectDir.runGradleProjects().output
+        val output = workingDir.runGradleProjects().output
 
         output shouldContain "Project ':newModule'"
     }
 
 }
 
+class TestCase(
+    path: String,
+    workingPath: String,
+    projectDir: Path = Paths.get(".").toAbsolutePath(),
+    val testCaseDir: Path = projectDir.resolve("src/test/resources/test-cases/$path"),
+    val workingDir: Path = projectDir.resolve("build/test-workspace/$workingPath")
+)
+
+private fun testCase(
+    path: String,
+    workingPath: String = path,
+    block: TestCase.() -> Unit
+) {
+    TestCase(path, workingPath).apply {
+        workingDir.deleteRecursively()
+        workingDir.createDirectories()
+        testCaseDir.recursiveCopyTo(workingDir)
+    }.run(block)
+}
+
 private val Path.modulesKt: Path
-    get() = resolve("buildSrc/src/main/kotlin/modules.kt")
+    get() = resolve(".gradle/automodule/module-graph/src/main/kotlin/modules.kt")
 
 private val Path.lastModified: FileTime
     get() = Files.getLastModifiedTime(this)
