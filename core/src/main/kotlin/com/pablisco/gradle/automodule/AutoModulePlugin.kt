@@ -64,6 +64,7 @@ private fun SettingsScope.generateModuleGraph() {
     if (isCached() and isCodeUpToDate()) {
         log("Module Graph is UP-TO-DATE")
     } else {
+        val extraRepository = autoModule.pluginRepositoryPath?.let { "maven(url = \"${it}\")" } ?: ""
         generatedGraphModule.fileTree {
             "settings.gradle.kts" += "rootProject.name = \"module-graph\""
             "build.gradle.kts" += """
@@ -73,7 +74,7 @@ private fun SettingsScope.generateModuleGraph() {
 
                 repositories {
                     jcenter()
-                    mavenLocal() // TODO remove for non local
+                    $extraRepository
                     gradlePluginPortal()
                 }
 

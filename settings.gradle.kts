@@ -3,8 +3,7 @@ rootProject.name = "auto-module"
 pluginManagement {
     repositories {
         // load self from last build
-        maven(url = uri("$rootDir/repo"))
-        mavenCentral()
+        maven(url = "$rootDir/repo")
         gradlePluginPortal()
     }
 }
@@ -34,4 +33,6 @@ autoModule {
     ignore(":gradle")
     ignore(":core:src:test:resources")
     ignore(":core:out")
+
+    pluginRepository("$rootDir/repo")
 }

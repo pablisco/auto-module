@@ -1,16 +1,13 @@
 buildscript {
     repositories {
-        maven(url = uri("$rootDir/repo"))
-        google()
+        maven(url = "$rootDir/repo")
         jcenter()
-        mavenCentral()
         gradlePluginPortal()
     }
 }
 
 allprojects {
     repositories {
-        google()
         jcenter()
         mavenCentral()
     }

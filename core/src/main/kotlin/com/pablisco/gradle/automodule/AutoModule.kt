@@ -1,12 +1,20 @@
 package com.pablisco.gradle.automodule
 
 import com.pablisco.gradle.automodule.filetree.FileTreeScope
-import org.gradle.api.logging.LogLevel
 
 open class AutoModule {
 
     internal val ignored: MutableList<String> = mutableListOf()
     internal val templates: MutableList<AutoModuleTemplate> = mutableListOf()
+    internal var pluginRepositoryPath: String? = null
+
+    /**
+     * Used, in development, to add a repository to the generated code to look for itself.
+     */
+    @Suppress("unused") // Api
+    fun pluginRepository(repositoryPath: String) {
+        pluginRepositoryPath = repositoryPath
+    }
 
     /**
      * Adds the **absolute** path to any module that we want to ignore.

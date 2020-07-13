@@ -11,7 +11,7 @@
   "createdBy": {
     "gradle": {
       "version": "6.5",
-      "buildId": "ctt7zriisbd2lpc6w72stu5p5a"
+      "buildId": "2rw6qqqksje2ngojrnovvfqduy"
     }
   },
   "variants": [
@@ -30,11 +30,11 @@
         {
           "name": "core-0.12.jar",
           "url": "core-0.12.jar",
-          "size": 88782,
-          "sha512": "48e116cf263dbdd2a0f5c6d2bb369634034efc48f4e9d707703f6bd8e7973f9288966b1a261bccdce09ad7faf2166641a741a57191642b706922d2622cf11891",
-          "sha256": "0ea485d451f0052f4caceaab4cba007d2eb30af70ca92662312e536a8b918205",
-          "sha1": "907a4fbaa111cb3cc5d9390c4585407e2ef2be96",
-          "md5": "236703727a46ccbdfcf49a28d6fd79a1"
+          "size": 89247,
+          "sha512": "2a876e92a29c7ca03fdacd16935dec1bdc0bca6bd369db68981c86691fe6e42857f01fd6efad3fe14a57ac5226119cf616fd627bdac4fcfe667e09abe2f736f1",
+          "sha256": "74bb616755b6be8cc22610c860233f3f0ad820aaba41354bb9c55002466ae324",
+          "sha1": "057b44181542d9289eda5fc598a180ec9262c212",
+          "md5": "3f1aebf386e1e8a69b18754f50287796"
         }
       ]
     },
@@ -76,11 +76,11 @@
         {
           "name": "core-0.12.jar",
           "url": "core-0.12.jar",
-          "size": 88782,
-          "sha512": "48e116cf263dbdd2a0f5c6d2bb369634034efc48f4e9d707703f6bd8e7973f9288966b1a261bccdce09ad7faf2166641a741a57191642b706922d2622cf11891",
-          "sha256": "0ea485d451f0052f4caceaab4cba007d2eb30af70ca92662312e536a8b918205",
-          "sha1": "907a4fbaa111cb3cc5d9390c4585407e2ef2be96",
-          "md5": "236703727a46ccbdfcf49a28d6fd79a1"
+          "size": 89247,
+          "sha512": "2a876e92a29c7ca03fdacd16935dec1bdc0bca6bd369db68981c86691fe6e42857f01fd6efad3fe14a57ac5226119cf616fd627bdac4fcfe667e09abe2f736f1",
+          "sha256": "74bb616755b6be8cc22610c860233f3f0ad820aaba41354bb9c55002466ae324",
+          "sha1": "057b44181542d9289eda5fc598a180ec9262c212",
+          "md5": "3f1aebf386e1e8a69b18754f50287796"
         }
       ]
     }
