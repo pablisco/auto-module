@@ -4,4 +4,5 @@ plugins {
 
 autoModule {
     ignore(":settingsKtIgnored")
+    pluginRepository(rootDir.resolve("../../../../repo").absolutePath)
 }
