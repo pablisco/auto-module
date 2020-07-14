@@ -8,19 +8,26 @@ pluginManagement {
     }
 }
 
-includeBuild("$rootDir/gradle/dependencies") {
-    dependencySubstitution {
-        substitute(module("gradle:dependencies")).with(project(":"))
+fun includeBuilds(vararg names: String) {
+    names.forEach { name ->
+        includeBuild("$rootDir/gradle/$name") {
+            dependencySubstitution {
+                substitute(module("gradle:$name")).with(project(":"))
+            }
+        }
     }
-}
-
-gradle.rootProject {
-    buildscript {
-        dependencies {
-            classpath("gradle:dependencies")
+    gradle.rootProject {
+        buildscript {
+            dependencies {
+                names.forEach { name ->
+                    classpath("gradle:$name")
+                }
+            }
         }
     }
 }
+
+includeBuilds("dependencies", "maven-version-check")
 
 plugins {
     id("com.pablisco.gradle.automodule") version "0.12"

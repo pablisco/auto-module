@@ -37,10 +37,11 @@ tasks {
         dependsOn(copyTestResources)
     }
 
-    val jar by getting
-    val publish by getting
-    jar.finalizedBy(publish)
+    "jar" { finalizedBy("publish") }
 
+    "publishPlugins" {
+        onlyIf { version !in AutoModuleMavenMetadata.versions }
+    }
 }
 
 val sourcesJar = tasks.register<Jar>("sourcesJar") {
