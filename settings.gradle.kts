@@ -35,11 +35,11 @@ plugins {
 
 autoModule {
     // Ignore tests cases and build folder
-    ignore(":core:build")
+    ignore(":plugin:build")
     ignore(":demos")
     ignore(":gradle")
-    ignore(":core:src:test:resources")
-    ignore(":core:out")
+    ignore(":plugin:src:test:resources")
+    ignore(":plugin:out")
 
     pluginRepository("$rootDir/repo")
 }

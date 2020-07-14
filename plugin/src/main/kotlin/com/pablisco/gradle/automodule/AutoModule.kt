@@ -2,7 +2,12 @@ package com.pablisco.gradle.automodule
 
 import com.pablisco.gradle.automodule.filetree.FileTreeScope
 
-open class AutoModule {
+open class AutoModule(
+    /**
+     *
+     */
+    var buildModulesRoot: String = "gradle"
+) {
 
     internal val ignored: MutableList<String> = mutableListOf()
     internal val templates: MutableList<AutoModuleTemplate> = mutableListOf()

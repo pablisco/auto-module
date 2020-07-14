@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <metadata>
   <groupId>com.pablisco.gradle.automodule</groupId>
-  <artifactId>com.pablisco.gradle.automodule.gradle.plugin</artifactId>
+  <artifactId>plugin</artifactId>
   <versioning>
     <latest>0.12</latest>
     <release>0.12</release>

@@ -10,7 +10,7 @@
   <dependencies>
     <dependency>
       <groupId>com.pablisco.gradle.automodule</groupId>
-      <artifactId>core</artifactId>
+      <artifactId>plugin</artifactId>
       <version>0.12</version>
     </dependency>
   </dependencies>
