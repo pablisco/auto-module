@@ -8,6 +8,7 @@ import com.pablisco.gradle.automodule.utils.md5
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.initialization.Settings
+import org.gradle.api.tasks.Delete
 import org.gradle.kotlin.dsl.*
 
 class AutoModulePlugin : Plugin<Settings> {
@@ -36,6 +37,9 @@ private fun SettingsScope.apply() {
             }
         }
         extensions.create<GroovyAutoModules>("autoModules")
+        tasks.create<Delete>("cleanAutoModule") {
+            delete(directoriesHashFile, generatedMd5File)
+        }
     }
 }
 

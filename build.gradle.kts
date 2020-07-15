@@ -19,5 +19,6 @@ allprojects {
 tasks {
     create<Delete>("clean") {
         delete(allprojects.map { it.buildDir })
+        dependsOn("cleanAutoModule")
     }
 }
