@@ -58,7 +58,7 @@ publishing {
         }
     }
     repositories {
-        maven(url = uri("$rootDir/repo"))
+        maven(url = rootDir.resolve("repo"))
     }
 }
 

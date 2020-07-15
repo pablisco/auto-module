@@ -1,6 +1,6 @@
 buildscript {
     repositories {
-        maven(url = "$rootDir/repo")
+        maven(url = rootDir.resolve("repo"))
         jcenter()
         gradlePluginPortal()
     }
