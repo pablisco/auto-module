@@ -37,8 +37,6 @@ tasks {
         dependsOn(copyTestResources)
     }
 
-    "jar" { finalizedBy("publish") }
-
     "publishPlugins" {
         onlyIf { version !in AutoModuleMavenMetadata.versions }
     }
