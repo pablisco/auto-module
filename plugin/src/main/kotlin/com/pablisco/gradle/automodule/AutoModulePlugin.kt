@@ -32,6 +32,10 @@ private fun SettingsScope.apply() {
     gradle.rootProject {
         autoModule.templates.forEach { template -> createTask(template) }
         buildscript {
+            repositories {
+                autoModule.pluginRepositoryPath?.let { maven(url = it) }
+                gradlePluginPortal()
+            }
             dependencies {
                 classpath("automodule:graph")
             }
@@ -72,6 +76,12 @@ private fun SettingsScope.generateModuleGraph() {
         generatedGraphModule.fileTree {
             "settings.gradle.kts" += "rootProject.name = \"module-graph\""
             "build.gradle.kts" += """
+                buildscript{
+                    repositories {
+                        $extraRepository
+                        gradlePluginPortal()
+                    }
+                }
                 plugins {
                     kotlin("jvm") version "1.3.72"
                 }
