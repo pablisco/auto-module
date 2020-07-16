@@ -11,7 +11,7 @@
   "createdBy": {
     "gradle": {
       "version": "6.5",
-      "buildId": "lelit4zlwrcczb5jowtquhxaia"
+      "buildId": "rtbccxxsdfewlh7no4nvkfcahm"
     }
   },
   "variants": [
@@ -30,11 +30,11 @@
         {
           "name": "plugin-0.12.jar",
           "url": "plugin-0.12.jar",
-          "size": 91900,
-          "sha512": "fc9a2a11a206247c01aa10ecd5b1e7665fa0fae302468f5ef06ccfcd15e9269fa35d3904a23181a4ee7650bf6668bc34f73203b1828eecc11500e58582a7d548",
-          "sha256": "cdda8c6397636c5910be281646abaff835521078edcadab7104419ea63ec1902",
-          "sha1": "be45148c09e1b73c8d29686c63ecbee2b0657d7e",
-          "md5": "924a228d975b69730bf3354ab7ac991b"
+          "size": 93450,
+          "sha512": "3122871061e046c91f4bc0bf6d547d4785dfffbe6e3d817608894a1498441348e6a45b0a0fa2c1dbad92a01c3008395f83890d81a246b147dc8f9e9c1d887594",
+          "sha256": "e3d4e0b10b7b8f8b283857d6aafeecdfc40d62d4250c0a11f78ca1556cfcab02",
+          "sha1": "906ebe8f70e6a435074e4a2ee461a6140a4151d0",
+          "md5": "57106b354858a00364de4ff387571446"
         }
       ]
     },
@@ -76,11 +76,11 @@
         {
           "name": "plugin-0.12.jar",
           "url": "plugin-0.12.jar",
-          "size": 91900,
-          "sha512": "fc9a2a11a206247c01aa10ecd5b1e7665fa0fae302468f5ef06ccfcd15e9269fa35d3904a23181a4ee7650bf6668bc34f73203b1828eecc11500e58582a7d548",
-          "sha256": "cdda8c6397636c5910be281646abaff835521078edcadab7104419ea63ec1902",
-          "sha1": "be45148c09e1b73c8d29686c63ecbee2b0657d7e",
-          "md5": "924a228d975b69730bf3354ab7ac991b"
+          "size": 93450,
+          "sha512": "3122871061e046c91f4bc0bf6d547d4785dfffbe6e3d817608894a1498441348e6a45b0a0fa2c1dbad92a01c3008395f83890d81a246b147dc8f9e9c1d887594",
+          "sha256": "e3d4e0b10b7b8f8b283857d6aafeecdfc40d62d4250c0a11f78ca1556cfcab02",
+          "sha1": "906ebe8f70e6a435074e4a2ee461a6140a4151d0",
+          "md5": "57106b354858a00364de4ff387571446"
         }
       ]
     }
