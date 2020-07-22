@@ -41,5 +41,5 @@ autoModule {
     ignore(":plugin:src:test:resources")
     ignore(":plugin:out")
 
-    pluginRepository(rootDir.resolve("repo").toURI().toString())
+    pluginRepository(rootDir.resolve("repo"))
 }

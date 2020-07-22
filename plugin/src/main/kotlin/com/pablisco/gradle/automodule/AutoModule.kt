@@ -1,6 +1,8 @@
 package com.pablisco.gradle.automodule
 
 import com.pablisco.gradle.automodule.filetree.FileTreeScope
+import java.io.File
+import java.nio.file.Path
 
 open class AutoModule(
     /**
@@ -17,8 +19,13 @@ open class AutoModule(
      * Used, in development, to add a repository to the generated code to look for itself.
      */
     @Suppress("unused") // Api
-    fun pluginRepository(repositoryPath: String) {
-        pluginRepositoryPath = repositoryPath
+    fun pluginRepository(repositoryPath: Path) {
+        pluginRepositoryPath = repositoryPath.toUri().toString()
+    }
+
+    @Suppress("unused") // Api
+    fun pluginRepository(repositoryFile: File) {
+        pluginRepository(repositoryFile.toPath())
     }
 
     /**
