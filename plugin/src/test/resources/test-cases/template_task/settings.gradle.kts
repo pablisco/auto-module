@@ -6,5 +6,5 @@ autoModule {
     template("default") {
         emptyFile( "build.gradle.kts")
     }
-    pluginRepository(rootDir.resolve("../../../../repo").absolutePath)
+    pluginRepository(rootDir.resolve("../../../../repo"))
 }

@@ -3,5 +3,5 @@ plugins {
 }
 
 autoModule {
-    pluginRepository(rootDir.resolve("../../../../repo").absolutePath)
+    pluginRepository(rootDir.resolve("../../../../repo"))
 }
