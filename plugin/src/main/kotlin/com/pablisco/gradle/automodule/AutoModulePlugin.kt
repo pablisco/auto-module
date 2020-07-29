@@ -94,7 +94,7 @@ private fun SettingsScope.generateModuleGraph() {
 
                 dependencies {
                     implementation(kotlin("stdlib"))
-                    api("com.pablisco.gradle.automodule:plugin:0.12")
+                    api("com.pablisco.gradle.automodule:plugin:0.13")
                 }
             """.trimIndent()
         }

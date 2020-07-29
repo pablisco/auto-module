@@ -30,7 +30,7 @@ fun includeBuilds(vararg names: String) {
 includeBuilds("dependencies", "maven-version-check")
 
 plugins {
-    id("com.pablisco.gradle.automodule") version "0.12"
+    id("com.pablisco.gradle.automodule") version "0.13"
 }
 
 autoModule {
