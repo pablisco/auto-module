@@ -5,10 +5,7 @@ import com.pablisco.gradle.automodule.gradle.kotlinModule
 import com.pablisco.gradle.automodule.gradle.runGradle
 import com.pablisco.gradle.automodule.gradle.runGradleProjects
 import com.pablisco.gradle.automodule.gradle.shouldBeSuccess
-import com.pablisco.gradle.automodule.utils.createDirectories
-import com.pablisco.gradle.automodule.utils.delete
-import com.pablisco.gradle.automodule.utils.deleteRecursively
-import com.pablisco.gradle.automodule.utils.exists
+import com.pablisco.gradle.automodule.utils.*
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldContain
 import org.amshove.kluent.shouldNotContain
@@ -17,6 +14,7 @@ import org.junit.jupiter.api.Test
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.nio.file.StandardOpenOption
 import java.nio.file.attribute.FileTime
 
 class AutoModulePluginTest {
@@ -110,7 +108,8 @@ class TestCase(
     workingPath: String,
     projectDir: Path = Paths.get(".").toAbsolutePath(),
     val testCaseDir: Path = projectDir.resolve("src/test/resources/test-cases/$path"),
-    val workingDir: Path = projectDir.resolve("build/test-workspace/$workingPath")
+//    val workingDir: Path = projectDir.resolve("build/test-workspace/$workingPath")
+    val workingDir: Path = createTempDir(workingPath).toPath()
 )
 
 private fun testCase(
@@ -122,6 +121,12 @@ private fun testCase(
         workingDir.deleteRecursively()
         workingDir.createDirectories()
         testCaseDir.recursiveCopyTo(workingDir)
+        workingDir.resolve("settings.gradle.kts")
+            .write(
+                """autoModule { pluginRepository(file("${Paths.get("../repo").toRealPath()}")) }""",
+                StandardOpenOption.APPEND
+            )
+
     }.run(block)
 }
 
