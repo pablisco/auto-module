@@ -11,6 +11,8 @@ import org.gradle.api.initialization.Settings
 import org.gradle.api.tasks.Delete
 import org.gradle.kotlin.dsl.*
 
+private const val version = "0.13"
+
 class AutoModulePlugin : Plugin<Settings> {
 
     override fun apply(target: Settings) {
@@ -69,7 +71,7 @@ private fun SettingsScope.notifyIgnoredModules() {
 }
 
 private fun SettingsScope.generateModuleGraph() {
-    if (isCached() and isCodeUpToDate()) {
+    if (isCached() and isCodeUpToDate() and isSameVersion()) {
         log("Module Graph is UP-TO-DATE")
     } else {
         val extraRepository = autoModule.pluginRepositoryPath?.let { "maven(url = \"${it}\")" } ?: ""
@@ -94,7 +96,7 @@ private fun SettingsScope.generateModuleGraph() {
 
                 dependencies {
                     implementation(kotlin("stdlib"))
-                    api("com.pablisco.gradle.automodule:plugin:0.13")
+                    api("com.pablisco.gradle.automodule:plugin:$version")
                 }
             """.trimIndent()
         }
@@ -113,12 +115,16 @@ private fun SettingsScope.isCached(): Boolean =
 private fun SettingsScope.isCodeUpToDate(): Boolean =
     generatedCodeMd5 == generatedMd5File.maybeReadText()
 
+private fun SettingsScope.isSameVersion(): Boolean =
+    version == versionFile.maybeReadText()
+
 private val SettingsScope.generatedCodeMd5: String
     get() = generatedGraphSource.resolve("$modulesFileName.kt").md5()
 
 private fun SettingsScope.saveChecksums() {
     directoriesHashFile.createFile(content = "$scriptsHash")
     generatedMd5File.createFile(content = generatedCodeMd5)
+    versionFile.createFile(content = version)
 }
 
 private fun SettingsScope.includeModulesToSettings() {

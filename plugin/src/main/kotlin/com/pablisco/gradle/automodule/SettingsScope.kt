@@ -12,6 +12,7 @@ internal class SettingsScope(settings: Settings) : Settings by settings {
     internal val generatedGraphSource = generatedGraphModule.resolve("src/main/kotlin/")
     internal val directoriesHashFile = workingDirectory.resolve("directories")
     internal val generatedMd5File = workingDirectory.resolve("generated")
+    internal val versionFile = workingDirectory.resolve("version")
     internal val modulesFileName = "modules"
 
     val autoModule: AutoModule = extensions.create("autoModule")
