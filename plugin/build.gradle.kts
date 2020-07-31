@@ -1,11 +1,11 @@
 plugins {
-    kotlin("jvm") version kotlinVersion
+    kotlin("jvm")
     idea
     `kotlin-dsl`
     `java-gradle-plugin`
     `maven-publish`
-    id("com.palantir.idea-test-fix") version "0.1.0"
-    id("com.gradle.plugin-publish") version "0.12.0"
+    id("com.palantir.idea-test-fix")
+    id("com.gradle.plugin-publish")
 }
 
 dependencies {

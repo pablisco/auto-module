@@ -1,5 +1,7 @@
 rootProject.name = "auto-module"
 
+apply(from = "gradle/include.settings.gradle.kts")
+
 pluginManagement {
     repositories {
         // load self from last build
@@ -7,27 +9,6 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
-
-fun includeBuilds(vararg names: String) {
-    names.forEach { name ->
-        includeBuild("$rootDir/gradle/$name") {
-            dependencySubstitution {
-                substitute(module("gradle:$name")).with(project(":"))
-            }
-        }
-    }
-    gradle.rootProject {
-        buildscript {
-            dependencies {
-                names.forEach { name ->
-                    classpath("gradle:$name")
-                }
-            }
-        }
-    }
-}
-
-includeBuilds("dependencies", "maven-version-check")
 
 plugins {
     id("com.pablisco.gradle.automodule") version "0.13"
@@ -40,6 +21,7 @@ autoModule {
     ignore(":gradle")
     ignore(":plugin:src:test:resources")
     ignore(":plugin:out")
+    ignore(":plugin:src")
 
     pluginRepository(rootDir.resolve("repo"))
 }

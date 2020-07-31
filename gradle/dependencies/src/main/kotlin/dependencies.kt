@@ -1,29 +1,37 @@
-val libs = Libs
-val tests = Tests
+import java.util.*
 
-const val kotlinVersion = "1.3.72"
-const val junitJupiterVersion = "5.6.0"
-const val retrofitVersion = "2.9.0"
+val libs get() = Libs
+val tests get() = Tests
 
 object Libs {
-
-    const val kotlinJdk8 = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
-    const val kotlinIo = "org.jetbrains.kotlin:kotlin-util-io:$kotlinVersion"
-
-    const val kotlinPoet = "com.squareup:kotlinpoet:1.5.0"
-
-    const val kotlinxCoroutines = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.7"
-
-    const val retrofit = "com.squareup.retrofit2:retrofit:$retrofitVersion"
-    const val retrofitXml = "com.squareup.retrofit2:converter-jaxb:$retrofitVersion"
-
+    val kotlinJdk8 = resolve("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    val kotlinIo = resolve("org.jetbrains.kotlin:kotlin-util-io")
+    val kotlinPoet = resolve("com.squareup:kotlinpoet")
+    val kotlinxCoroutines = resolve("org.jetbrains.kotlinx:kotlinx-coroutines-core")//:1.3.7"
+    val retrofit = resolve("com.squareup.retrofit2:retrofit")
+    val retrofitXml = resolve("com.squareup.retrofit2:converter-jaxb")
 }
 
 object Tests {
+    val junit5Jupiter = resolve("org.junit.jupiter:junit-jupiter")
+    val junit5JupiterApi = resolve("org.junit.jupiter:junit-jupiter-api")
+    val junit5JupiterParams = resolve("org.junit.jupiter:junit-jupiter-params")
+    val kluent = resolve("org.amshove.kluent:kluent")
+}
 
-    const val junit5Jupiter = "org.junit.jupiter:junit-jupiter:$junitJupiterVersion"
-    const val junit5JupiterApi = "org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion"
-    const val junit5JupiterParams = "org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion"
-    const val kluent = "org.amshove.kluent:kluent:1.60"
+private object Versions : Properties() {
+    init {
+        load(javaClass.classLoader.getResourceAsStream("versions.properties"))
+    }
 
+    fun find(notation: String): String =
+        entries.map { (k, v) -> (k as String).replace('_', ':') to (v as String) }
+            .firstOrNull { (prefix, _) -> notation.startsWith(prefix) }
+            ?.second
+            ?: error("no version present on versions.properties for $notation")
+
+}
+
+private fun resolve(notation: String): String = notation.split(":").let { (group, artifact) ->
+    "$group:$artifact:${Versions.find(notation)}"
 }
