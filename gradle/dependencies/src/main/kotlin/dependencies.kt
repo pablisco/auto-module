@@ -7,7 +7,7 @@ object Libs {
     val kotlinJdk8 = resolve("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     val kotlinIo = resolve("org.jetbrains.kotlin:kotlin-util-io")
     val kotlinPoet = resolve("com.squareup:kotlinpoet")
-    val kotlinxCoroutines = resolve("org.jetbrains.kotlinx:kotlinx-coroutines-core")//:1.3.7"
+    val kotlinxCoroutines = resolve("org.jetbrains.kotlinx:kotlinx-coroutines-core")
     val retrofit = resolve("com.squareup.retrofit2:retrofit")
     val retrofitXml = resolve("com.squareup.retrofit2:converter-jaxb")
 }
