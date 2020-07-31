@@ -80,7 +80,7 @@ When you have a large project, it may not be possible to migrate all your script
 However, you can use the same semantics as you have in Kotlin with Groovy scripts:
 
 ```groovy
-implementation(autModules.features.home)
+implementation(autoModules.features.home)
 ```
 
 This allows you to have a smooth migration to Kotlin Scripts in the future but remain with minimum 
