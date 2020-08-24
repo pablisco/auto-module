@@ -1,7 +1,7 @@
 # Auto Module
 
 [![Actions](https://github.com/pablisco/auto-module/workflows/Publish/badge.svg)](https://github.com/pablisco/auto-module/actions) 
-[![Gradle Plugin Portal](https://img.shields.io/maven-metadata/v/https/plugins.gradle.org/m2/com/pablisco/gradle/automodule/core/maven-metadata.xml.svg?label=Gradle)](https://plugins.gradle.org/plugin/com.pablisco.gradle.automodule)
+[![Gradle Plugin Portal](https://img.shields.io/maven-metadata/v/https/plugins.gradle.org/m2/com/pablisco/gradle/automodule/plugin/maven-metadata.xml.svg?label=Gradle)](https://plugins.gradle.org/plugin/com.pablisco.gradle.automodule)
 
 This Gradle plugin helps with module dependencies. And by help, it means it does the hard work for you.
 
@@ -21,7 +21,7 @@ Remove all your `include()` instructions inside `settings.gradle[.kts]` and add 
 
 ```kotlin
 plugins {
-    id("com.pablisco.gradle.automodule") version "0.13"
+    id("com.pablisco.gradle.automodule") version "0.14"
 }
 ```
 
@@ -58,7 +58,7 @@ object autoModules {
 This will be accessible from any module, so you can add dependencies like:
 
 ```kotlin
-implementation(project(autoModules.features.home)
+implementation(project(autoModules.features.home))
 ```
 
 ## Ignore modules

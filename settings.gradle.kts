@@ -11,7 +11,7 @@ pluginManagement {
 }
 
 plugins {
-    id("com.pablisco.gradle.automodule") version "0.13"
+    id("com.pablisco.gradle.automodule") version "0.14"
 }
 
 autoModule {
