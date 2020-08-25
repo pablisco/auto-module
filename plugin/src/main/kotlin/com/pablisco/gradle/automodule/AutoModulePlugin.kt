@@ -11,7 +11,7 @@ import org.gradle.api.initialization.Settings
 import org.gradle.api.tasks.Delete
 import org.gradle.kotlin.dsl.*
 
-private const val version = "0.13"
+private const val version = "0.14"
 
 class AutoModulePlugin : Plugin<Settings> {
 
