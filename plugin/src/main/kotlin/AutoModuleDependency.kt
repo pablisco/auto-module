@@ -6,7 +6,7 @@ fun autoModuleDependency(
     configuration: String? = null
 ): AutoModuleDependency = mapOfNonNull(
     "path" to path,
-    "configuration" toMaybe configuration
+    "configuration" to configuration
 )
 
 val AutoModuleDependency.path: String
@@ -16,7 +16,5 @@ val AutoModuleDependency.path: String
 infix fun AutoModuleDependency.configuration(configuration: String): AutoModuleDependency =
     this + mapOf("configuration" to configuration)
 
-private fun <K, V> mapOfNonNull(vararg entries: Pair<K, V>?): Map<K, V> =
-    entries.filterNotNull().toMap()
-
-internal infix fun <K, V> K.toMaybe(value: V?): Pair<K, V>? = value?.let { this to it }
+private fun <K, V> mapOfNonNull(vararg entries: Pair<K, V?>): Map<K, V> =
+    entries.mapNotNull { (k, v) -> v?.let { k to v } }.toMap()
