@@ -5,15 +5,13 @@ import java.io.File
 import java.nio.file.Path
 
 open class AutoModule(
-    /**
-     *
-     */
-    var buildModulesRoot: String = "gradle"
+    var buildModulesRoot: String = "gradle",
+    var versionsPropertiesFile: String = "versions.properties",
+    internal val ignored: MutableList<String> = mutableListOf(),
+    internal var pluginRepositoryPath: String? = null
 ) {
 
-    internal val ignored: MutableList<String> = mutableListOf()
     internal val templates: MutableList<AutoModuleTemplate> = mutableListOf()
-    internal var pluginRepositoryPath: String? = null
 
     /**
      * Used, in development, to add a repository to the generated code to look for itself.

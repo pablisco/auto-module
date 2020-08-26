@@ -9,14 +9,14 @@ plugins {
 }
 
 dependencies {
-    implementation(libs.kotlinJdk8)
-    implementation(libs.kotlinIo)
-    implementation(libs.kotlinPoet)
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    implementation("org.jetbrains.kotlin:kotlin-util-io")
+    implementation("com.squareup:kotlinpoet")
 
-    testImplementation(tests.junit5Jupiter)
-    testImplementation(tests.junit5JupiterApi)
-    testImplementation(tests.junit5JupiterParams)
-    testImplementation(tests.kluent)
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation("org.junit.jupiter:junit-jupiter-api")
+    testImplementation("org.junit.jupiter:junit-jupiter-params")
+    testImplementation("org.amshove.kluent:kluent")
     testImplementation(gradleTestKit())
 }
 
@@ -37,9 +37,9 @@ tasks {
         dependsOn(copyTestResources)
     }
 
-    "publishPlugins" {
-        onlyIf { version !in AutoModuleMavenMetadata.versions }
-    }
+//    "publishPlugins" {
+//        onlyIf { version !in AutoModuleMavenMetadata.versions }
+//    }
 }
 
 val sourcesJar = tasks.register<Jar>("sourcesJar") {
