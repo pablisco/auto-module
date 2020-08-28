@@ -15,6 +15,7 @@ import org.gradle.kotlin.dsl.buildscript
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.maven
 import org.gradle.kotlin.dsl.repositories
+import java.io.File
 
 private const val version = "0.14"
 
@@ -31,6 +32,7 @@ class AutoModulePlugin : Plugin<Settings> {
             generateModuleGraph()
             injectVersionResolution(versions)
             includeGeneratedGraphModule()
+            includeBuildModules()
 
             gradle.allprojects {
                 extensions.add("versions", versions)
@@ -56,6 +58,32 @@ class AutoModulePlugin : Plugin<Settings> {
     }
 
 }
+
+private fun SettingsScope.includeBuildModules() {
+    val buildModulesRoot = rootDir.resolve(autoModule.buildModulesRoot)
+
+    buildModulesRoot.children()
+        .filter { it.isDirectory }
+        .filter { dir -> dir.children().any { it.name == "build.gradle.kts" } }
+        .forEach { dir ->
+            includeBuild(dir) {
+                dependencySubstitution {
+                    substitute(module("gradle:${dir.name}")).with(project(":"))
+                }
+            }
+            gradle.rootProject {
+                buildscript {
+                    dependencies {
+                        classpath("gradle:${dir.name}")
+                    }
+                }
+            }
+        }
+
+
+}
+
+private fun File.children(): List<File> = listFiles()?.toList() ?: emptyList()
 
 private fun SettingsScope.whenEvaluated(f: SettingsScope.() -> Unit) {
     gradle.settingsEvaluated { f() }
@@ -113,8 +141,8 @@ private fun SettingsScope.generateModuleGraph() {
     if (isCached() and isCodeUpToDate() and isSameVersion()) {
         log("Module Graph is UP-TO-DATE")
     } else {
-        val extraRepository =
-            autoModule.pluginRepositoryPath?.let { "maven(url = \"${it}\")" } ?: ""
+        val extraRepository = autoModule.pluginRepositoryPath
+            ?.let { "maven(url = \"${it}\")" } ?: ""
         generatedGraphModule.fileTree {
             "settings.gradle.kts" += "rootProject.name = \"module-graph\""
             "build.gradle.kts" += """

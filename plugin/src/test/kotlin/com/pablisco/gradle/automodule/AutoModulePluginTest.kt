@@ -38,13 +38,13 @@ class AutoModulePluginTest {
     }
 
     @Test
-    fun `generates modules code WITH custom versions location`() = testCase("custom_versions_location") {
+    fun `versions are loaded WITH custom versions location`() = testCase("custom_versions_location") {
         val result = workingDir.runGradleProjects()
         result.shouldBeSuccess()
     }
 
     @Test
-    fun `generates modules code WITH remote versions location`() = testCase("remote_versions_location") {
+    fun `versions are loaded WITH remote versions location`() = testCase("remote_versions_location") {
         val result = workingDir.runGradleProjects()
         result.shouldBeSuccess()
     }
@@ -111,6 +111,16 @@ class AutoModulePluginTest {
         val output = workingDir.runGradleProjects().output
 
         output shouldContain "Project ':newModule'"
+    }
+
+    @Test
+    fun `build modules are included`() = testCase(
+        path = "build_modules"
+    ) {
+        workingDir.runGradleProjects()
+        val output = workingDir.runGradleProjects().output
+
+        output shouldContain "Hello Gradle!"
     }
 
 }

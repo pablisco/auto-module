@@ -75,8 +75,6 @@ afterEvaluate {
         }
 }
 
-apply(from = "fix-publish-version-resolution.gradle.kts")
-
 idea {
     module {
         // hides test kts files so they are not parsed by the IDE
