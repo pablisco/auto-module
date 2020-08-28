@@ -38,6 +38,18 @@ class AutoModulePluginTest {
     }
 
     @Test
+    fun `generates modules code WITH custom versions location`() = testCase("custom_versions_location") {
+        val result = workingDir.runGradleProjects()
+        result.shouldBeSuccess()
+    }
+
+    @Test
+    fun `generates modules code WITH remote versions location`() = testCase("remote_versions_location") {
+        val result = workingDir.runGradleProjects()
+        result.shouldBeSuccess()
+    }
+
+    @Test
     fun `ignores modules`() = testCase("ignore_modules") {
         val result = workingDir.runGradleProjects()
 
@@ -108,8 +120,7 @@ class TestCase(
     workingPath: String,
     projectDir: Path = Paths.get(".").toAbsolutePath(),
     val testCaseDir: Path = projectDir.resolve("src/test/resources/test-cases/$path"),
-//    val workingDir: Path = projectDir.resolve("build/test-workspace/$workingPath")
-    val workingDir: Path = createTempDir(workingPath).toPath()
+    val workingDir: Path = projectDir.resolve("build/test-workspace/$workingPath")
 )
 
 private fun testCase(

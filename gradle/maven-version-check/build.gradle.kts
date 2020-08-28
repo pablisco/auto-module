@@ -8,9 +8,9 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation(libs.retrofit)
-    implementation(libs.retrofitXml)
-    implementation(libs.kotlinxCoroutines)
+    implementation("com.squareup.retrofit2:retrofit")
+    implementation("com.squareup.retrofit2:converter-jaxb")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
 }
 
 tasks {

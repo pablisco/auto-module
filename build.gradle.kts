@@ -11,9 +11,8 @@ allprojects {
         jcenter()
         mavenCentral()
     }
-
     group = "com.pablisco.gradle.automodule"
-    version = "0.14"
+    version = "0.15"
 }
 
 tasks {

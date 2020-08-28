@@ -1,6 +1,6 @@
 pluginManagement {
     val versions = java.util.Properties().apply {
-        file("src/main/resources/versions.properties").inputStream().use { load(it) }
+        file("versions.properties").inputStream().use { load(it) }
     }
     resolutionStrategy {
         eachPlugin {
