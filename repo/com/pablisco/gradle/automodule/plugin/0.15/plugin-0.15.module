@@ -1,0 +1,88 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "com.pablisco.gradle.automodule",
+    "module": "plugin",
+    "version": "0.15",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "6.6.1",
+      "buildId": "epzsdqdnpjelbm5pzkgrfc7lpy"
+    }
+  },
+  "variants": [
+    {
+      "name": "apiElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 8,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-api",
+        "org.jetbrains.kotlin.localToProject": "public",
+        "org.jetbrains.kotlin.platform.type": "jvm"
+      },
+      "files": [
+        {
+          "name": "plugin-0.15.jar",
+          "url": "plugin-0.15.jar",
+          "size": 114021,
+          "sha512": "d17b9cef5fc65dfaa9e618f87929e75dee221447b5a74af08ae3914793b0bc843bbe27cf691df09f74051e588122ee648e2bb985b78361430beef59b55816d0f",
+          "sha256": "889717409be9f3b2779a19087543934abe612124dd2fbea3c32ab06413c068fd",
+          "sha1": "bbc982b5b33f7182610bcec652a171365b68d6c3",
+          "md5": "02f83f53879ef2998e2fb6f357b0a18d"
+        }
+      ]
+    },
+    {
+      "name": "runtimeElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 8,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime",
+        "org.jetbrains.kotlin.localToProject": "public",
+        "org.jetbrains.kotlin.platform.type": "jvm"
+      },
+      "dependencies": [
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib-jdk8",
+          "version": {
+            "requires": "1.4.0"
+          }
+        },
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-util-io",
+          "version": {
+            "requires": "1.4.0"
+          }
+        },
+        {
+          "group": "com.squareup",
+          "module": "kotlinpoet",
+          "version": {
+            "requires": "1.6.0"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "plugin-0.15.jar",
+          "url": "plugin-0.15.jar",
+          "size": 114021,
+          "sha512": "d17b9cef5fc65dfaa9e618f87929e75dee221447b5a74af08ae3914793b0bc843bbe27cf691df09f74051e588122ee648e2bb985b78361430beef59b55816d0f",
+          "sha256": "889717409be9f3b2779a19087543934abe612124dd2fbea3c32ab06413c068fd",
+          "sha1": "bbc982b5b33f7182610bcec652a171365b68d6c3",
+          "md5": "02f83f53879ef2998e2fb6f357b0a18d"
+        }
+      ]
+    }
+  ]
+}
