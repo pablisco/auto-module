@@ -47,21 +47,6 @@ val sourcesJar = tasks.register<Jar>("sourcesJar") {
     from(sourceSets.main.map { it.allSource })
 }
 
-publishing {
-    publications {
-        create<MavenPublication>("Plugin") {
-            from(components["java"])
-            artifact(sourcesJar.get())
-            groupId = "${project.group}"
-            artifactId = project.name
-            version = "${project.version}"
-        }
-    }
-    repositories {
-        maven(url = rootDir.resolve("repo"))
-    }
-}
-
 pluginBundle {
     website = "https://github.com/pablisco/auto-module/"
     vcsUrl = "https://github.com/pablisco/auto-module/"
@@ -78,6 +63,19 @@ gradlePlugin {
         }
     }
 }
+
+afterEvaluate {
+    publishing.publications.withType<MavenPublication>()
+        .configureEach {
+            versionMapping {
+                allVariants {
+                    fromResolutionResult()
+                }
+            }
+        }
+}
+
+apply(from = "fix-publish-version-resolution.gradle.kts")
 
 idea {
     module {
