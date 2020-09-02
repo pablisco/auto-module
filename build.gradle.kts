@@ -6,6 +6,10 @@ buildscript {
     }
 }
 
+plugins {
+    id("com.github.blueboxware.tocme")
+}
+
 allprojects {
     repositories {
         jcenter()
@@ -20,4 +24,8 @@ tasks {
         delete(allprojects.map { it.buildDir })
         dependsOn("cleanAutoModule")
     }
+}
+
+tocme {
+    doc(file("readme.md"))
 }

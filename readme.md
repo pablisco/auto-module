@@ -15,6 +15,18 @@ So, these are some (but not all) of the reasons why you should use this:
  - __Progressive upgrade:__ It has support for Groovy gradle so you don't have to migrate all your modules to use kts if you are not quite there yet or don't need it on all of them.
  - __Module generation:__ You can define tasks that can be used from command line to generate a predefined module structure with the provided template. The IDE only allows to create modules in the root of the project, this allows to create it on any directory as well as provide the means for templating how certain modules are defined.
  
+
+## Table of Contents 
+
+<!-- toc -->
+- __[How do I use it?](#how-do-i-use-it)__
+- __[Ignore modules](#ignore-modules)__
+- __[Legacy Groovy Script support](#legacy-groovy-script-support)__
+- __[Module generation tasks](#module-generation-tasks)__
+- __[History](#history)__
+- __[License](#license)__
+<!-- /toc -->
+ 
 ## How do I use it?
 
 Remove all your `include()` instructions inside `settings.gradle[.kts]` and add this:
