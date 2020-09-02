@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     kotlin("jvm")
     idea
@@ -37,9 +39,9 @@ tasks {
         dependsOn(copyTestResources)
     }
 
-//    "publishPlugins" {
-//        onlyIf { version !in AutoModuleMavenMetadata.versions }
-//    }
+    "publishPlugins" {
+        onlyIf { version !in AutoModuleMavenMetadata.versions }
+    }
 }
 
 val sourcesJar = tasks.register<Jar>("sourcesJar") {
@@ -61,6 +63,12 @@ gradlePlugin {
             description = "A Gradle plugin to generate the module graph and include the modules"
             implementationClass = "com.pablisco.gradle.automodule.AutoModulePlugin"
         }
+    }
+}
+
+publishing {
+    repositories {
+        maven(url = rootDir.resolve("repo"))
     }
 }
 

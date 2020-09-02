@@ -1,18 +1,7 @@
-//buildscript {
-//    dependencies {
-//        // TODO: Propagate versions from root
-//        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.4.0")
-//    }
-//}
+repositories { jcenter() }
 
-buildscript {
-    repositories {
-        jcenter()
-    }
+plugins { kotlin("jvm") }
+
+dependencies {
+    implementation("com.squareup.retrofit2:retrofit")
 }
-
-repositories {
-    jcenter()
-}
-
-plugins { kotlin("jvm") version "1.4.0" }

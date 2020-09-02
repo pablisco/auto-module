@@ -4,14 +4,13 @@ import com.pablisco.gradle.automodule.filetree.FileTreeScope
 import java.io.File
 import java.nio.file.Path
 
-object AutoModule {
-
-    var buildModulesRoot: String = "gradle"
-    var versions: String = "versions.properties"
-    internal val ignored: MutableList<String> = mutableListOf()
-    internal var pluginRepositoryPath: String? = null
-
+data class AutoModule internal constructor(
+    var buildModulesRoot: String = "gradle",
+    var versions: String = "versions.properties",
+    internal val ignored: MutableList<String> = mutableListOf(),
+    internal var pluginRepositoryPath: String? = null,
     internal val templates: MutableList<AutoModuleTemplate> = mutableListOf()
+) {
 
     /**
      * Used, in development, to add a repository to the generated code to look for itself.

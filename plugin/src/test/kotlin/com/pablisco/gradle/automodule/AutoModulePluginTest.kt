@@ -70,10 +70,11 @@ class AutoModulePluginTest {
         path = "simple_module",
         workingPath = "no_code_gen_with_cache"
     ) {
+        val modulesKt = workingDir.modulesKt("no_code_gen_with_cache")
         workingDir.runGradleProjects()
-        val initialRunLastModified = workingDir.modulesKt.lastModified
+        val initialRunLastModified = modulesKt.lastModified
         workingDir.runGradleProjects()
-        val cachedRunLastModified = workingDir.modulesKt.lastModified
+        val cachedRunLastModified = modulesKt.lastModified
 
         initialRunLastModified shouldBeEqualTo cachedRunLastModified
     }
@@ -92,11 +93,12 @@ class AutoModulePluginTest {
         path = "simple_module",
         workingPath = "files_are_generated_after_manual_delete"
     ) {
+        val modulesKt = workingDir.modulesKt("files_are_generated_after_manual_delete")
         workingDir.runGradleProjects()
-        workingDir.modulesKt.delete()
+        modulesKt.delete()
         workingDir.runGradleProjects()
 
-        check(workingDir.modulesKt.exists())
+        check(modulesKt.exists())
     }
 
     @Test
@@ -114,13 +116,12 @@ class AutoModulePluginTest {
     }
 
     @Test
-    fun `build modules are included`() = testCase(
-        path = "build_modules"
-    ) {
-        workingDir.runGradleProjects()
-        val output = workingDir.runGradleProjects().output
+    fun `classpath includes build modules`() = testCase("build_modules") {
+        workingDir.resolve("gradle/buildStuff").addLocalRepository()
+        val result = workingDir.runGradleProjects()
 
-        output shouldContain "Hello Gradle!"
+        result.shouldBeSuccess()
+        result.output shouldContain "Hello Gradle!"
     }
 
 }
@@ -142,17 +143,21 @@ private fun testCase(
         workingDir.deleteRecursively()
         workingDir.createDirectories()
         testCaseDir.recursiveCopyTo(workingDir)
-        workingDir.resolve("settings.gradle.kts")
-            .write(
-                """autoModule { pluginRepository(file("${Paths.get("../repo").toRealPath()}")) }""",
-                StandardOpenOption.APPEND
-            )
-
+        workingDir.addLocalRepository()
     }.run(block)
 }
 
-private val Path.modulesKt: Path
-    get() = resolve(".gradle/automodule/module-graph/src/main/kotlin/modules.kt")
+private fun Path.addLocalRepository() {
+    with(resolve("settings.gradle.kts")) {
+        write(
+            """autoModule { pluginRepository(file("${Paths.get("../repo").toRealPath()}")) }""",
+            StandardOpenOption.APPEND
+        )
+    }
+}
+
+private fun Path.modulesKt(projectName: String): Path =
+    resolve(".gradle/automodule/${projectName}-modules/src/main/kotlin/modules.kt")
 
 private val Path.lastModified: FileTime
     get() = Files.getLastModifiedTime(this)

@@ -1,13 +1,10 @@
 package com.pablisco.gradle.automodule
 
-import autoModule
 import com.pablisco.gradle.automodule.filetree.fileTree
-import com.pablisco.gradle.automodule.utils.createFile
-import com.pablisco.gradle.automodule.utils.log
-import com.pablisco.gradle.automodule.utils.maybeReadText
-import com.pablisco.gradle.automodule.utils.md5
+import com.pablisco.gradle.automodule.utils.*
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ModuleVersionSelector
 import org.gradle.api.initialization.Settings
 import org.gradle.api.tasks.Delete
@@ -17,70 +14,71 @@ import org.gradle.kotlin.dsl.maven
 import org.gradle.kotlin.dsl.repositories
 import java.io.File
 
-private const val version = "0.14"
+private const val version = "0.15"
 
 class AutoModulePlugin : Plugin<Settings> {
 
-    override fun apply(target: Settings) {
-        target.extensions.add("autoModule", AutoModule)
-        SettingsScope(target).whenEvaluated {
-            val versions = Versions(rootDir, autoModule.versions)
-            target.extensions.add("versions", versions)
+    private val autoModule = AutoModule()
 
+    override fun apply(target: Settings) {
+        target.extensions.add("autoModule", autoModule)
+        SettingsScope(autoModule, target).whenEvaluated {
+            val versions = Versions(rootDir, autoModule.versions)
+            addGlobalExtension("versions", extension = versions)
             notifyIgnoredModules()
             includeModulesToSettings()
             generateModuleGraph()
             injectVersionResolution(versions)
             includeGeneratedGraphModule()
             includeBuildModules()
-
-            gradle.allprojects {
-                extensions.add("versions", versions)
-            }
-
-            gradle.rootProject {
-                createTemplateTasks()
-                buildscript {
-                    repositories {
-                        autoModule.pluginRepositoryPath?.let { maven(url = it) }
-                        gradlePluginPortal()
-                    }
-                    dependencies {
-                        classpath("automodule:graph")
-                    }
-                }
-                extensions.create<GroovyAutoModules>("autoModules")
-                tasks.create<Delete>("cleanAutoModule") {
-                    delete(directoriesHashFile, generatedMd5File)
-                }
-            }
+            createTemplateTasks()
+            addDebugArtifactRepository()
+            addGroovySupport()
+            createCleanTask()
         }
     }
 
 }
 
+private fun SettingsScope.createCleanTask() = gradle.rootProject {
+    tasks.create<Delete>("cleanAutoModule") {
+        delete(directoriesHashFile, generatedMd5File)
+    }
+}
+
+private fun SettingsScope.addGroovySupport() = gradle.rootProject {
+    extensions.create<GroovyAutoModules>("autoModules")
+}
+
+private fun SettingsScope.addDebugArtifactRepository() = gradle.rootProject {
+    buildscript {
+        repositories {
+            autoModule.pluginRepositoryPath?.let { maven(url = it) }
+            gradlePluginPortal()
+        }
+    }
+}
+
 private fun SettingsScope.includeBuildModules() {
     val buildModulesRoot = rootDir.resolve(autoModule.buildModulesRoot)
 
-    buildModulesRoot.children()
+    val buildModules = buildModulesRoot.children()
         .filter { it.isDirectory }
         .filter { dir -> dir.children().any { it.name == "build.gradle.kts" } }
-        .forEach { dir ->
-            includeBuild(dir) {
-                dependencySubstitution {
-                    substitute(module("gradle:${dir.name}")).with(project(":"))
-                }
+    buildModules.forEach { dir ->
+        includeBuild(dir) {
+            dependencySubstitution {
+                substitute(module("gradle:${dir.name}:local")).with(project(":"))
             }
-            gradle.rootProject {
-                buildscript {
-                    dependencies {
-                        classpath("gradle:${dir.name}")
-                    }
+        }
+        gradle.rootProject {
+            buildscript {
+                dependencies {
+                    classpath("gradle:${dir.name}:local")
                 }
             }
         }
-
-
+    }
 }
 
 private fun File.children(): List<File> = listFiles()?.toList() ?: emptyList()
@@ -92,13 +90,20 @@ private fun SettingsScope.whenEvaluated(f: SettingsScope.() -> Unit) {
 private fun SettingsScope.includeGeneratedGraphModule() {
     includeBuild(generatedGraphModule) {
         dependencySubstitution {
-            substitute(module("automodule:graph")).with(project(":"))
+            substitute(module("automodule:graph:local")).with(project(":"))
+        }
+    }
+    gradle.rootProject {
+        buildscript {
+            dependencies { classpath("automodule:graph:local") }
         }
     }
 }
 
-private fun Project.createTemplateTasks() {
-    autoModule.templates.forEach { template -> createTemplateTask(template) }
+private fun SettingsScope.createTemplateTasks() = gradle.rootProject {
+    afterEvaluate {
+        autoModule.templates.forEach { template -> createTemplateTask(template) }
+    }
 }
 
 private fun Project.createTemplateTask(template: AutoModuleTemplate): CreateModuleTask =
@@ -108,7 +113,7 @@ private fun Project.createTemplateTask(template: AutoModuleTemplate): CreateModu
         template
     )
 
-private fun notifyIgnoredModules() {
+private fun SettingsScope.notifyIgnoredModules() {
     if (autoModule.ignored.isNotEmpty()) {
         log("Ignoring modules: ${autoModule.ignored}")
     }
@@ -118,14 +123,17 @@ private fun ModuleVersionSelector.hasVersion(): Boolean =
     version?.takeIf { it.isNotEmpty() } != null
 
 private fun SettingsScope.injectVersionResolution(versions: Versions) {
-    gradle.allprojects {
-        configurations.all {
-            resolutionStrategy.eachDependency {
-                requested.takeUnless { it.hasVersion() }?.apply {
-                    useVersion(versions.findDependencyVersion(group, name))
-                }
+    val injectDependencies: Configuration.() -> Unit = {
+        resolutionStrategy.eachDependency {
+            requested.takeUnless { it.hasVersion() }?.also { versionSelector ->
+                useVersion(versions.getDependencyVersion(versionSelector))
             }
         }
+    }
+
+    gradle.allprojects {
+        buildscript { configurations.all(injectDependencies) }
+        configurations.all(injectDependencies)
     }
 
     pluginManagement {
@@ -144,7 +152,7 @@ private fun SettingsScope.generateModuleGraph() {
         val extraRepository = autoModule.pluginRepositoryPath
             ?.let { "maven(url = \"${it}\")" } ?: ""
         generatedGraphModule.fileTree {
-            "settings.gradle.kts" += "rootProject.name = \"module-graph\""
+            "settings.gradle.kts" += "rootProject.name = \"$graphModuleName\""
             "build.gradle.kts" += """
                 buildscript{
                     repositories {

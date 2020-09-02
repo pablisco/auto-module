@@ -16,9 +16,4 @@ sourceSets.main {
         include("**.kt")
         exclude("**.kts")
     }
-    resources {
-        srcDir(projectDir)
-        include("**.properties")
-        exclude("**.kts")
-    }
 }

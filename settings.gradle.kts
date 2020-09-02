@@ -1,7 +1,5 @@
 rootProject.name = "auto-module"
 
-apply(from = "gradle/include.settings.gradle.kts")
-
 pluginManagement {
     repositories {
         // load self from local repo
