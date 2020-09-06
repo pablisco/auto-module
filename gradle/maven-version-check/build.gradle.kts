@@ -7,10 +7,10 @@ repositories {
 }
 
 dependencies {
-    implementation(kotlin("stdlib"))
-    implementation("com.squareup.retrofit2:retrofit")
-    implementation("com.squareup.retrofit2:converter-jaxb")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
+    implementation(libs.kotlin.jdk8)
+    implementation(libs.kotlin.x.coroutines)
+    implementation(libs.square.retrofit)
+    implementation(libs.square.retrofitXml)
 }
 
 

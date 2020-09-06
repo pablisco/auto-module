@@ -16,3 +16,16 @@ autoModule {
     versions = "../../versions.properties"
     pluginRepository(rootDir.resolve("../../repo"))
 }
+
+includeBuild("../dependencies") {
+    dependencySubstitution {
+        substitute(module("gradle:dependencies:local")).with(project(":"))
+    }
+}
+gradle.rootProject {
+    buildscript {
+        dependencies {
+            classpath("gradle:dependencies:local")
+        }
+    }
+}

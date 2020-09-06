@@ -9,14 +9,14 @@ plugins {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    implementation("org.jetbrains.kotlin:kotlin-util-io")
-    implementation("com.squareup:kotlinpoet")
+    implementation(libs.kotlin.jdk8)
+    implementation(libs.kotlin.io)
+    implementation(libs.kotlinPoet)
 
-    testImplementation("org.junit.jupiter:junit-jupiter")
-    testImplementation("org.junit.jupiter:junit-jupiter-api")
-    testImplementation("org.junit.jupiter:junit-jupiter-params")
-    testImplementation("org.amshove.kluent:kluent")
+    testImplementation(tests.junit5.jupiter)
+    testImplementation(tests.junit5.jupiterApi)
+    testImplementation(tests.junit5.jupiterParams)
+    testImplementation(tests.kluent)
     testImplementation(gradleTestKit())
 }
 
